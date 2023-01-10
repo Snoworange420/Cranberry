@@ -1,2 +1,5 @@
 # Cranberry
-The real Mousse recode with my new java knowledge. Brought to you by Snoworange himself.
+
+Advanced utility 1.12.2 forge mod, aimed at use in anarchy environments. 
+
+##
