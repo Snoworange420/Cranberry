@@ -17,7 +17,7 @@ public class ModuleButton extends Button {
     private boolean subOpen;
 
     public ModuleButton(Module module) {
-        super(module.getName());
+        super(module.getDisplayName());
         this.module = module;
         this.initSettings();
     }
@@ -43,9 +43,9 @@ public class ModuleButton extends Button {
                     newItems.add(new Slider(setting));
                 }
 
-                //if (setting.isEnumSetting()) {
-                //    newItems.add(new EnumButton(setting));
-                //}
+                if (setting.isEnumSetting() && !setting.getName().equals("Keybind")) {
+                    newItems.add(new EnumButton(setting));
+                }
             }
         }
         newItems.add(new BindButton(this.module.getSettingByName("Keybind")));
@@ -61,8 +61,8 @@ public class ModuleButton extends Button {
                 for (Item item : this.items) {
                     Component.counter1[0] = Component.counter1[0] + 1;
                     if (!item.isHidden()) {
-                        item.setLocation(this.x + 1.0f, this.y + (height += 15.0f));
-                        item.setHeight(16);
+                        item.setLocation(this.x + 1.0f, this.y + (height += 16.0f));
+                        item.setHeight(17);
                         item.setWidth(this.width - 9);
                         item.drawScreen(mouseX, mouseY, partialTicks);
                     }
@@ -103,12 +103,12 @@ public class ModuleButton extends Button {
     @Override
     public int getHeight() {
         if (this.subOpen) {
-            int height = 16;
+            int height = 14;
             for (Item item : this.items) {
                 if (item.isHidden()) continue;
-                height += item.getHeight() + 1;
+                height += item.getHeight();
             }
-            return height + 2;
+            return height + 5;
         }
         return 16;
     }

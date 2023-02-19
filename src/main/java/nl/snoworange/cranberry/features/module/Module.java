@@ -1,6 +1,8 @@
 package nl.snoworange.cranberry.features.module;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.MinecraftForge;
 import nl.snoworange.cranberry.features.setting.Bind;
@@ -88,8 +90,6 @@ public class Module {
 
     public void onLiving() {}
 
-    public void onRender2d() {}
-
     public void onRender3d() {}
 
     public void toggle() {
@@ -158,6 +158,27 @@ public class Module {
         this.toggled = enabled;
     }
 
+    public void setEnabledTryEnableAndDisable(boolean enabled) {
+        this.toggled = enabled;
+
+        try {
+            if (enabled) {
+                enable();
+            }
+            if (!enabled) {
+                disable();
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+
+            try {
+                ChatUtils.sendMessage(exception.toString());
+            } catch (Exception ignored) {
+
+            }
+        }
+    }
+
     public void setKeybind(int keybind) {
         this.bind.setValue(new Bind(keybind));
     }
@@ -175,7 +196,7 @@ public class Module {
         return setting;
     }
 
-    //i have to put it here so i wont crash lmao
+    //I have to put it here, so I won't crash lmao
     public Setting<Bind> bind = register(new Setting<Bind>("Keybind", new Bind(-1)));
 
     public Setting getSettingByName(String name) {

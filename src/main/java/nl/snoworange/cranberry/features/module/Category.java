@@ -8,7 +8,8 @@ public enum Category {
     MOVEMENT("Movement"),
     PLAYER("Player"),
     MISC("Misc"),
-    STRONKSWORDMETA("32k");
+    STRONKSWORDMETA("32k"),
+    HUD("HUD");
 
     public String name;
 

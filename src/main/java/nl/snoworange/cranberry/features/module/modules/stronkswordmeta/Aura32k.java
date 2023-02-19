@@ -14,13 +14,12 @@ import nl.snoworange.cranberry.event.events.TotemPopEvent;
 import nl.snoworange.cranberry.features.module.Category;
 import nl.snoworange.cranberry.features.module.Module;
 import nl.snoworange.cranberry.features.setting.Setting;
-import nl.snoworange.cranberry.misc.java.Bad;
+import nl.snoworange.cranberry.misc.java.skillissue.Bad;
 import nl.snoworange.cranberry.util.minecraft.InventoryUtils;
 
 public class Aura32k extends Module {
 
     public final Setting<Double> range = register(new Setting<>("Range", 7.5, 0.0, 12.0));
-    public final Setting<Integer> threadAmount = register(new Setting<>("Threads", 5, 1, 15));
     public final Setting<Boolean> swing = register(new Setting<>("SwingArm", true));
     public final Setting<Boolean> attackFriends = register(new Setting<>("AttackFriends", false));
 
@@ -63,14 +62,16 @@ public class Aura32k extends Module {
 
             if (target.getHealth() < 0 || target.isDead) continue;
 
-            if (mc.player.getDistance(target) < range.getValue()) {
+            if (mc.player.getDistance(target) <= range.getValue()) {
 
                 currentTarget = target;
 
-                sendPacketDirectly(new CPacketHeldItemChange(stronkswordslot));
+                mc.player.connection.sendPacket(new CPacketHeldItemChange(stronkswordslot));
                 mc.playerController.attackEntity(mc.player, target);
-                sendPacketDirectly(new CPacketHeldItemChange(mc.player.inventory.currentItem));
+                mc.player.connection.sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem));
                 if (swing.getValue()) mc.player.swingArm(EnumHand.MAIN_HAND);
+            } else {
+                currentTarget = null;
             }
         }
     }
@@ -83,14 +84,12 @@ public class Aura32k extends Module {
 
             if (currentTarget == null || stronkswordslot == -1) return;
 
-            for (int threads = 0; threads <= threadAmount.getValue(); ++threads) {
-                new Thread(() -> {
-                    sendPacketDirectly(new CPacketHeldItemChange(stronkswordslot));
-                    sendPacketDirectly(new CPacketUseEntity(currentTarget));
-                    sendPacketDirectly(new CPacketHeldItemChange(mc.player.inventory.currentItem));
-                    if (swing.getValue()) mc.player.swingArm(EnumHand.MAIN_HAND);
-                }).start();
-            }
+            new Thread(() -> {
+                mc.player.connection.sendPacket(new CPacketHeldItemChange(stronkswordslot));
+                mc.player.connection.sendPacket(new CPacketUseEntity(currentTarget));
+                mc.player.connection.sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem));
+                if (swing.getValue()) mc.player.swingArm(EnumHand.MAIN_HAND);
+            }).start();
         }
     }
 
@@ -99,12 +98,5 @@ public class Aura32k extends Module {
         event.tooEasy(true);
 
         Bad.getSkill().getGood().info(event.getPlayer().getName() + " is bad ong imagine being that bad");
-    }
-
-    public void sendPacketDirectly(Packet<?> packet) {
-        if (mc.getConnection() != null) {
-            NetworkManager networkManager = mc.getConnection().getNetworkManager();
-            networkManager.channel().writeAndFlush(packet);
-        }
     }
 }

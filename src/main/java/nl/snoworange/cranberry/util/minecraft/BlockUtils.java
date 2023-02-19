@@ -120,7 +120,7 @@ public class BlockUtils {
                         .wrapDegrees(pitch - mc.player.rotationPitch)};
     }
 
-    public static Vec3d getEyesPos(){
+    public static Vec3d getEyesPos() {
         return new Vec3d(mc.player.posX,
                 mc.player.posY + mc.player.getEyeHeight(),
                 mc.player.posZ);

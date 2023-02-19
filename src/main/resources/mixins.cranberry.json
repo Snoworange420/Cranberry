@@ -4,8 +4,16 @@
   "package": "nl.snoworange.cranberry.mixin.mixins",
   "refmap": "mixins.cranberry.refmap.json",
   "mixins": [
-    "MixinNetworkManager",
+    "MixinBlockShulkerBox",
+    "MixinGuiChat",
+    "MixinGuiNewChat",
     "MixinGuiScreen",
-    "MixinItemStack"
+    "MixinItemStack",
+    "MixinNetworkManager"
+  ],
+  "client": [
+    "IMinecraft",
+    "MixinGuiConnecting",
+    "MixinGuiMultiplayer"
   ]
 }

@@ -107,6 +107,18 @@ public class InventoryUtils {
         return -1;
     }
 
+    public static int findHotbarPiston() {
+        for (int i = 0; i < 9; ++i) {
+
+            ItemStack slot = mc.player.inventory.mainInventory.get(i);
+
+            if (slot.getItem() instanceof ItemPiston) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public static int findShulkerWith32ksInside() {
         for (int i = 0; i < 36; ++i) {
             ItemStack itemStack = mc.player.inventory.getStackInSlot(i);

@@ -12,15 +12,12 @@ import nl.snoworange.cranberry.event.events.BozoJustDiedEvent;
 import nl.snoworange.cranberry.event.events.DeathEvent;
 import nl.snoworange.cranberry.event.events.PacketEvent;
 import nl.snoworange.cranberry.event.events.TotemPopEvent;
-import scala.actors.threadpool.Arrays;
-
-import java.util.ArrayList;
 
 public class ForgeEventListener {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
 
-    @SubscribeEvent
+    @SubscribeEvent //doesnt work, why?
     public void onLiving(LivingEvent.LivingUpdateEvent event) {
         if (event.getEntityLiving() instanceof EntityPlayer) {
             for (EntityPlayer player : mc.world.playerEntities) {
@@ -31,6 +28,7 @@ public class ForgeEventListener {
         }
     }
 
+    //bozo
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onDeath(DeathEvent event) {
         if (event.getPlayer().getName().equalsIgnoreCase("asdacashier")

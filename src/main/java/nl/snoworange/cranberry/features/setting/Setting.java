@@ -34,6 +34,17 @@ public class Setting <T> {
         this.hasRestriction = true;
     }
 
+    public Setting(String name, T defaultValue, T min, T max, boolean isVisible) {
+        this.name = name;
+        this.value = defaultValue;
+        this.defaultValue = defaultValue;
+        this.plannedValue = defaultValue;
+        this.min = min;
+        this.max = max;
+        this.isVisible = isVisible;
+        this.hasRestriction = true;
+    }
+
     public Setting(String name, T defaultValue, boolean isVisible) {
         this.name = name;
         this.value = defaultValue;

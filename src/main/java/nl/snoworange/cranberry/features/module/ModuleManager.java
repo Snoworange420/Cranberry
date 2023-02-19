@@ -2,7 +2,6 @@ package nl.snoworange.cranberry.features.module;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -11,11 +10,16 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import nl.snoworange.cranberry.Main;
 import nl.snoworange.cranberry.features.gui.clickgui.CranberryClickGUI;
+import nl.snoworange.cranberry.features.module.modules.combat.AutoTotem;
+import nl.snoworange.cranberry.features.module.modules.combat.PistonElevator;
+import nl.snoworange.cranberry.features.module.modules.combat.Surround;
 import nl.snoworange.cranberry.features.module.modules.exploit.SecretClose;
+import nl.snoworange.cranberry.features.module.modules.hud.Watermark;
+import nl.snoworange.cranberry.features.module.modules.misc.ConnectingGuiPlus;
 import nl.snoworange.cranberry.features.module.modules.movement.AutoSprint;
-import nl.snoworange.cranberry.features.module.modules.render.Tooltip;
-import nl.snoworange.cranberry.features.module.modules.stronkswordmeta.Aura32k;
-import nl.snoworange.cranberry.features.module.modules.stronkswordmeta.Auto32k;
+import nl.snoworange.cranberry.features.module.modules.player.FastXP;
+import nl.snoworange.cranberry.features.module.modules.render.*;
+import nl.snoworange.cranberry.features.module.modules.stronkswordmeta.*;
 import org.lwjgl.input.Keyboard;
 
 import java.util.ArrayList;
@@ -30,18 +34,37 @@ public class ModuleManager {
 
         modules.add(new Auto32k());
         modules.add(new Aura32k());
+        modules.add(new AutoTotem());
+        modules.add(new Surround());
+        modules.add(new PistonElevator());
 
         modules.add(new SecretClose());
+
+        modules.add(new HopperRadius());
+        modules.add(new Info32k());
         modules.add(new Tooltip());
+        modules.add(new DeathEffects());
+        modules.add(new CleanGUI());
+        modules.add(new Particles());
+        modules.add(new DVDIcon());
+        modules.add(new FullBright());
+        modules.add(new SelectionHighlight());
+
+        modules.add(new ConnectingGuiPlus());
 
         modules.add(new AutoSprint());
+
+        modules.add(new FastXP());
+
+        modules.add(new nl.snoworange.cranberry.features.module.modules.hud.ArrayList());
+        modules.add(new Watermark());
     }
 
     //lambda expression go brr
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         modules.forEach(m -> {
-            if (m.isEnabled()) {
+            if (m.isEnabled() && !m.n()) {
                 try {
                     m.onTick();
                 } catch (Exception e) {
@@ -54,7 +77,7 @@ public class ModuleManager {
     @SubscribeEvent
     public void onFastTick(TickEvent event) {
         modules.forEach(m -> {
-            if (m.isEnabled()) {
+            if (m.isEnabled() && !m.n()) {
                 try {
                     m.onFastTick();
                 } catch (Exception e) {
@@ -78,22 +101,9 @@ public class ModuleManager {
     }
 
     @SubscribeEvent
-    public void onRenderGameOverlayEvent(RenderGameOverlayEvent.Text event) {
-        modules.forEach(m -> {
-            if (m.isEnabled()) {
-                try {
-                    m.onRender2d();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-    @SubscribeEvent
     public void onRenderWorldLastEvent(RenderWorldLastEvent event) {
         modules.forEach(m -> {
-            if (m.isEnabled() & !m.n()) {
+            if (m.isEnabled() & Minecraft.getMinecraft().world != null) {
                 try {
                     m.onRender3d();
                 } catch (Exception e) {

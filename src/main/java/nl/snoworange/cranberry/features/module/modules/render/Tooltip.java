@@ -35,11 +35,11 @@ import java.util.Objects;
 public class Tooltip extends Module {
     private static Tooltip instance;
     public boolean enteredShulker = false;
-    public float renderPartialTicks = 0.0f;
-    public boolean generatedShulkerTooltip;
+    public ItemStack lastHoveredStack;
+    public boolean generatingShulkerTooltip;
     private boolean isMouseInShulkerGui = false;
-    public int systemX;
-    public int systemY;
+    public int lastX;
+    public int lastY;
 
     private final List<GuiShulkerPreview> guiCache = new ArrayList<>();
 
@@ -61,6 +61,8 @@ public class Tooltip extends Module {
 
     public final Setting<Boolean> alwaysDurability = register(new Setting<>("AlwaysDurability", true));
     public final Setting<Boolean> shulker = register(new Setting<>("PreviewShulker", true));
+    public final Setting<Boolean> modifyShulkerInfoLength = register(new Setting<>("ModifyShulkerInfoLength", true));
+    public final Setting<Integer> shulkerInfoMaxLength = register(new Setting<>("ShulkerInfoMaxLength", 27, -1, 27));
     public final Setting<Bind> displayShulker = register(new Setting<>("DisplayShulker", new Bind(Keyboard.KEY_V)));
     public final Setting<Bind> displayNbtTags = register(new Setting<>("DisplayNBTtags", new Bind(Keyboard.KEY_N)));
     public final Setting<Integer> shulkerOffsetX = register(new Setting<>("ShulkerOffsetX", 0, -100, 100));
@@ -77,63 +79,19 @@ public class Tooltip extends Module {
         super.onDisable();
     }
 
-    public static void onRenderTooltip(ItemStack itemStack, int x, int y, CallbackInfo ci) {
-        getInstance().renderShulkerTooltip(itemStack, x, y);
-        getInstance().updateKey();
-    }
+    public static void onRenderTooltip(ItemStack itemStack, int x, int y, CallbackInfo ci) {}
 
-    public void renderShulkerTooltip(ItemStack itemStack, int x, int y) {
-
-        if (!shulker.getValue() || this.isDisabled()) return;
-
-        if (!(itemStack.getItem() instanceof ItemShulkerBox)
-                || itemStack == ItemStack.EMPTY) return;
-
-        systemX = x;
-        systemY = y;
-
-        if (!enteredShulker) {
-            renderShulkerF(itemStack, x, y);
-        }
-    }
-
-    private void setInCache(int index, @Nullable GuiShulkerPreview viewer) {
-        if (viewer == null && index > 1 && index == guiCache.size() - 1) {
-            guiCache.remove(index); // remove non-reserved extras
-        } else if (index > guiCache.size() - 1) { // array not big enough
-            for (int i = Math.max(guiCache.size(), 1); i < index; ++i)
-                guiCache.add(i, null); // fill with nulls up to the index
-            guiCache.add(index, viewer);
+    private void setInCache(@Nullable GuiShulkerPreview viewer) {
+        if (0 > guiCache.size() - 1) {
+            guiCache.add(0, viewer);
         } else {
-            guiCache.set(index, viewer);
+            guiCache.set(0, viewer);
         }
     }
-
-    public void renderShulkerF(ItemStack itemStack, int x, int y) {
-        try {
-
-            setInCache(0, new GuiShulkerPreview(
-                    new ShulkerContainer(new ShulkerInventory(InventoryUtils.getShulkerContents(itemStack)), 27),
-                    itemStack,
-                    1
-            ));
-
-            guiCache
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .sorted()
-                    .forEach(
-                            GuiShulkerPreview -> {
-                                GuiShulkerPreview.posX = x;
-                                GuiShulkerPreview.posY = y;
-                                GuiShulkerPreview.drawScreen(x, y, renderPartialTicks);
-                            });
-        } catch (Exception exception) {
-            ChatUtils.sendMessage(exception.toString());
-        }
-    }
-
     public void bindShulkerTextureWithColor(ItemStack itemStack) {
+
+        if (itemStack == null || itemStack.equals(ItemStack.EMPTY)) return;
+
         try {
             mc.getTextureManager().bindTexture(new ResourceLocation(Main.MOD_ID, "shulkertextures/shulker_" + Objects.requireNonNull(itemStack.getItem().getRegistryName()).toString().replace("minecraft:", "").replace("_shulker_box", "") + ".png"));
         } catch (Exception exception) {
@@ -141,43 +99,90 @@ public class Tooltip extends Module {
         }
     }
 
-    //fixing this part soon
-
-    /*
     @SubscribeEvent
-    public void onPreTooptipRender(RenderTooltipEvent.Pre event) {
-        if (!(mc.currentScreen instanceof GuiContainer) || generatedShulkerTooltip) return;
-
-        if (isMouseInShulkerGui) {
-            // do not render tooltips that are inside the shulker gui
-            event.setCanceled(true);
-        }
-    }
-
-     */
-
-    @SubscribeEvent
-    public void onDrawScreen(GuiScreenEvent.DrawScreenEvent.Post event) {
+    public void updateKey(GuiScreenEvent.KeyboardInputEvent event) {
         if (this.isEnabled()) {
-            renderPartialTicks = event.getRenderPartialTicks();
-        }
-    }
-
-    public void updateKey() {
-        try {
-            if (Keyboard.isCreated() && Keyboard.getEventKeyState()) {
+            if (Keyboard.isCreated()) {
                 int keyCode = Keyboard.getEventKey();
 
                 if (keyCode <= 0) return;
 
-                if (displayShulker.getValue().getKey() == keyCode) {
-                    enteredShulker = true;
-                } else {
-                    enteredShulker = false;
+                if (keyCode == displayShulker.getValue().getKey()) {
+                    if (Keyboard.getEventKeyState() && !enteredShulker) {
+                        enteredShulker = true;
+                    } else if (!Keyboard.getEventKeyState() && enteredShulker) {
+                        enteredShulker = false;
+                    }
                 }
             }
-        } catch (Exception exception) {
-            exception.printStackTrace();
+        }
+    }
+
+    @SubscribeEvent
+    public void onPreTooptipRender(RenderTooltipEvent.Pre event) {
+        if (!(mc.currentScreen instanceof GuiContainer) || !generatingShulkerTooltip) return;
+
+        if (isMouseInShulkerGui) {
+            event.setCanceled(true);
+        }
+    }
+
+    //draw shulker box tooltip
+    @SubscribeEvent
+    public void onDrawScreen(GuiScreenEvent.DrawScreenEvent.Post event) {
+        if (this.isEnabled() && shulker.getValue()) {
+            try {
+
+                if (!(event.getGui() instanceof GuiContainer)) return;
+
+                GuiContainer gui = (GuiContainer) event.getGui();
+
+                Slot slot = gui.getSlotUnderMouse();
+
+                if (!enteredShulker && slot == null) lastHoveredStack = null;
+
+                if (slot != null) {
+                    if (gui.getSlotUnderMouse() != null) {
+                        if (slot.getHasStack() && slot.getStack().getItem() instanceof ItemShulkerBox) {
+                            if (!enteredShulker && lastHoveredStack != slot.getStack()) {
+                                lastHoveredStack = slot.getStack();
+                            }
+                        } else if (lastHoveredStack == null) {
+
+                        } else if (!enteredShulker && lastHoveredStack != slot.getStack()) {
+                            lastHoveredStack = null;
+                        }
+                    }
+                }
+
+                if (lastHoveredStack != null && lastHoveredStack.getItem() instanceof ItemShulkerBox) {
+
+                    if (!enteredShulker) {
+                        lastX = event.getMouseX();
+                        lastY = event.getMouseY();
+                    }
+
+                    setInCache(new GuiShulkerPreview(
+                            new ShulkerContainer(new ShulkerInventory(InventoryUtils.getShulkerContents(lastHoveredStack)), 27),
+                            lastHoveredStack,
+                            1
+                    ));
+
+                    guiCache
+                            .stream()
+                            .filter(Objects::nonNull)
+                            .sorted()
+                            .forEach(
+                                    GuiShulkerPreview -> {
+                                        GuiShulkerPreview.posX = lastX;
+                                        GuiShulkerPreview.posY = lastY;
+                                        GuiShulkerPreview.drawScreen(event.getMouseX(), event.getMouseY(), event.getRenderPartialTicks());
+                                    });
+                }
+            } catch (Exception exception) {
+                ChatUtils.sendMessage(exception.toString());
+                exception.printStackTrace();
+            }
         }
     }
 
@@ -225,6 +230,8 @@ public class Tooltip extends Module {
             int x = posX;
             int y = posY;
 
+            if (shulkerStack == null || shulkerStack == ItemStack.EMPTY) return;
+
             GlStateManager.enableBlend();
             GlStateManager.disableRescaleNormal();
             RenderHelper.disableStandardItemLighting();
@@ -266,17 +273,16 @@ public class Tooltip extends Module {
                 int ix = sx + j % 9 * 18;
                 int iy = sy + ((j / 9 + 1) * 18) + 1;
 
-                int px = ix + 8;
-                int py = iy - 1;
-
                 Slot slot = inventorySlots.inventorySlots.get(j);
 
                 if (slot != null && slot.getHasStack()) {
                     mc.getRenderItem().renderItemAndEffectIntoGUI(slot.getStack(), ix, iy);
                     mc.getRenderItem().renderItemOverlayIntoGUI(mc.fontRenderer, slot.getStack(), ix, iy, null);
-                }
 
-                if (isPointInRegion(px, py, 16, 16, mouseX, mouseY)) hoveringOver = slot;
+                    if (isPointInRegion(ix, iy, 16, 16, mouseX, mouseY)) {
+                        hoveringOver = slot;
+                    }
+                }
             }
 
             RenderHelper.disableStandardItemLighting();
@@ -306,15 +312,14 @@ public class Tooltip extends Module {
                 //tooltip of the item itself
                 GlStateManager.color(1.f, 1.f, 1.f, 1.0f);
                 GlStateManager.pushMatrix();
-                generatedShulkerTooltip = true;
-                renderToolTip(hoveringOver.getStack(), mouseX + 8, mouseY + 8);
-                generatedShulkerTooltip = false;
+                generatingShulkerTooltip = true;
+                renderToolTip(hoveringOver.getStack(), mouseX, mouseY);
+                generatingShulkerTooltip = false;
                 GlStateManager.popMatrix();
                 GlStateManager.enableDepth();
             }
 
-            if (isPointInRegion(this.posX, this.posY, getWidth(), getHeight(), mouseX, mouseY))
-                isMouseInShulkerGui = true;
+            isMouseInShulkerGui = isPointInRegion(this.posX, this.posY, getWidth(), getHeight(), mouseX, mouseY);
 
             GlStateManager.disableBlend();
             GlStateManager.color(1.f, 1.f, 1.f, 1.0f);

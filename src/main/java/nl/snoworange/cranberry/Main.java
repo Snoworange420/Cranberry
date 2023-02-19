@@ -1,6 +1,5 @@
 package nl.snoworange.cranberry;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -21,9 +20,9 @@ public class Main {
     //Refrences
     public static final String MOD_ID = "cranberry";
     public static final String NAME = "Cranberry";
-    public static final String VERSION = "v0.4.8";
+    public static final String VERSION = "v0.6.1";
     public static final String ACCEPTED_MINECRAFT_VERSIONS = "[1.12.2]";
-    public static final Logger LOGGER = LogManager.getLogger(Main.NAME);
+    public static final Logger LOGGER = LogManager.getLogger("Cranberry");
 
     public static ModuleManager moduleManager;
     public static Friend friendManager;

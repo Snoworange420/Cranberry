@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.Mixins;
 import java.util.Map;
 
 public class CranberryMixinLoader implements IFMLLoadingPlugin {
+
     private static boolean isObfuscatedEnvironment = false;
 
     public CranberryMixinLoader() {

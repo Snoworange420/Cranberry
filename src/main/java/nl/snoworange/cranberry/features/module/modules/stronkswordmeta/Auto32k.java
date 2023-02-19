@@ -41,15 +41,19 @@ public class Auto32k extends Module {
     public final Setting<Boolean> autoClose = register(new Setting<>("AutoClose", true));
     public final Setting<Boolean> timeout = register(new Setting<>("Timeout", true));
     public final Setting<Long> timeoutMs = register(new Setting<>("TimeoutMillis", 1250L, 49L, 3200L));
-    public final Setting<Double> range = register(new Setting<>("Range", 5.0, 1.0, 7.0));
+    public final Setting<Double> horizontalRange = register(new Setting<>("HorizontalRange", 6.0, 1.0, 7.0));
+    public final Setting<Double> plusVerticalRange = register(new Setting<>("+VerticalRange", 6.0, -7.0, 7.0));
+    public final Setting<Double> minusVerticalRange = register(new Setting<>("-VerticalRange", 6.0, -7.0, 7.0));
+    public final Setting<Double> maxPlaceRange = register(new Setting<>("MaxPlaceRange", 5.5, 1.0, 7.0));
+    public final Setting<Double> maxHopperRange = register(new Setting<>("MaxHopperRange", 5.0, 1.0, 7.0));
     public final Setting<Boolean> selectSwordSlot = register(new Setting<>("Select32kSlot", true));
     public final Setting<Boolean> checkFor32kShulks = register(new Setting<>("Force32kShulker", true));
     public final Setting<Boolean> debug = register(new Setting<>("Debug", false));
 
     public Auto32k() {
-        super("Auto32k"
-                , "Automatically bypasses the anti-illegal with a setup to retrieve a 32k sword"
-                , Category.STRONKSWORDMETA
+        super("Auto32k",
+                "Automatically bypasses the anti-illegal with a setup to retrieve a 32k sword",
+                Category.STRONKSWORDMETA
         );
     }
 
@@ -330,6 +334,12 @@ public class Auto32k extends Module {
                 phase = 6;
             }
         }
+
+        if (phase == 6) {
+            if (HopperRadius.getInstance().sync32kHopper.getValue() && basePos != null) {
+                HopperRadius.getInstance().hopperPos = placeVertically ? basePos.down(2) : basePos.offset(dispenserDirection.getOpposite());
+            }
+        }
     }
 
     public void searchBestPlacement() {
@@ -339,21 +349,21 @@ public class Auto32k extends Module {
         placeVertically = false;
 
         for (EnumFacing direction : EnumFacing.HORIZONTALS) {
-            for (BlockPos blockPos : BlockPos.getAllInBox(new BlockPos(mc.player.posX - range.getValue(), mc.player.posY - range.getValue(), mc.player.posZ - range.getValue()), new BlockPos(mc.player.posX + range.getValue(), mc.player.posY + range.getValue(), mc.player.posZ + range.getValue()))) {
+            for (BlockPos blockPos : BlockPos.getAllInBox(new BlockPos(mc.player.posX - horizontalRange.getValue(), mc.player.posY - minusVerticalRange.getValue(), mc.player.posZ - horizontalRange.getValue()), new BlockPos(mc.player.posX + horizontalRange.getValue(), mc.player.posY + plusVerticalRange.getValue(), mc.player.posZ + horizontalRange.getValue()))) {
                 if (basePos == null) {
 
                     tempBasePos = blockPos;
 
-                    if (mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) < range.getValue()
+                    if (mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= maxPlaceRange.getValue()
                             && BlockUtils.checkIfBlockIsPlaceable(blockPos.up())
                             && EnumFacing.getDirectionFromEntityLiving(blockPos.up(), mc.player).equals(direction)
                             && BlockUtils.checkIfBlockIsPlaceable(blockPos.offset(direction))
+                            && mc.player.getDistance(blockPos.offset(direction).getX(), blockPos.offset(direction).getY(), blockPos.offset(direction).getZ()) <= maxHopperRange.getValue()
                             && BlockUtils.hasEmptyBlockIn4Directions(blockPos.up())
                             && BlockUtils.isEmptyBlock(blockPos.offset(direction), true)
                             && BlockUtils.isEmptyBlock(blockPos.offset(direction).up(), true)
                             && !(BlockUtils.exsistsBlocksNearby(blockPos.offset(direction), Blocks.REDSTONE_BLOCK))
                     ) {
-
                         closestBlockPos = blockPos;
                     }
 
@@ -387,13 +397,14 @@ public class Auto32k extends Module {
 
         placeVertically = true;
 
-        for (BlockPos blockPos : BlockPos.getAllInBox(new BlockPos(mc.player.posX - range.getValue(), mc.player.posY, mc.player.posZ - range.getValue()), new BlockPos(mc.player.posX + range.getValue(), mc.player.posY + range.getValue(), mc.player.posZ + range.getValue()))) {
+        for (BlockPos blockPos : BlockPos.getAllInBox(new BlockPos(mc.player.posX - horizontalRange.getValue(), mc.player.posY - minusVerticalRange.getValue(), mc.player.posZ - horizontalRange.getValue()), new BlockPos(mc.player.posX + horizontalRange.getValue(), mc.player.posY + plusVerticalRange.getValue(), mc.player.posZ + horizontalRange.getValue()))) {
             if (basePos == null) {
 
-                if (mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) < range.getValue()
+                if (mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= maxPlaceRange.getValue()
                         && BlockUtils.isEmptyBlock(blockPos, true)
                         && BlockUtils.isEmptyBlock(blockPos.down(), true)
                         && BlockUtils.isEmptyBlock(blockPos.down(2), true)
+                        && mc.player.getDistance(blockPos.down(2).getX(), blockPos.down(2).getY(), blockPos.down(2).getX()) <= maxHopperRange.getValue()
                         && EnumFacing.getDirectionFromEntityLiving(blockPos, mc.player).equals(EnumFacing.DOWN)
                         && BlockUtils.checkIfBlockIsPlaceable(blockPos)
                         && (BlockUtils.checkIfBlockIsPlaceable(blockPos.down(2)) || mc.world.getBlockState(blockPos.down(3)).getMaterial().isSolid())
@@ -434,7 +445,7 @@ public class Auto32k extends Module {
 
     private void placeBlock(BlockPos pos) {
 
-        if (mc.world == null || mc.player == null) disable();
+        if (n()) return;
 
         EnumFacing side = BlockUtils.getPlaceableSide(pos);
 

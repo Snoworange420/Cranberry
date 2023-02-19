@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(ItemStack.class)
 public class MixinItemStack {
 
-    @Redirect(method = {"getTooltip"},
+    @Redirect(method = "getTooltip",
             at = @At(
                     value = "INVOKE",
                     target = "net/minecraft/item/ItemStack.isItemDamaged()Z"

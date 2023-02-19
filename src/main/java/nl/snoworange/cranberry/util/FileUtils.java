@@ -55,45 +55,46 @@ public class FileUtils {
 
     public static void saveActiveModules(File file) {
         try {
-            final File modules = new File(file.getAbsolutePath(), "activemodules.txt");
-            final BufferedWriter bw = new BufferedWriter(new FileWriter(modules));
+            File modules = new File(file.getAbsolutePath(), "activemodules.txt");
+            FileWriter fileWriter = new FileWriter(modules);
 
             for (Module module : Main.moduleManager.getModules()) {
-                bw.write(module.getName() + ":");
+                fileWriter.write(module.getName() + ":");
                 if (module.isToggled()) {
-                    bw.write("true");
+                    fileWriter.write("true");
                 }
                 else {
-                    bw.write("false");
+                    fileWriter.write("false");
                 }
-                bw.write("\r\n");
+                fileWriter.write("\r\n");
             }
-            bw.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            fileWriter.close();
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
     }
 
     public static void loadActiveModules(File file) {
         try {
-            final File modules = new File(file.getAbsolutePath(), "activemodules.txt");
+
+            File modules = new File(file.getAbsolutePath(), "activemodules.txt");
 
             if (!modules.exists()) {
                 modules.createNewFile();
                 return;
             }
 
-            final BufferedReader br = new BufferedReader(new FileReader(modules));
-            final List<String> linezz = Files.readAllLines(modules.toPath());
+            Scanner scanner = new Scanner(modules);
+            List<String> linezz = Files.readAllLines(modules.toPath());
 
             for (String line : linezz) {
 
                 String[] regex = line.split(":");
                 Module module = Main.moduleManager.getModuleByName(regex[0]);
 
-                module.setEnabledNoEvent(Boolean.parseBoolean(regex[1]));
+                module.setEnabledTryEnableAndDisable(Boolean.parseBoolean(regex[1]));
             }
-            br.close();
+            scanner.close();
         } catch (Exception exception) {
             exception.printStackTrace();
         }
@@ -101,73 +102,73 @@ public class FileUtils {
 
     public static void saveFriends(File file) {
         try {
-            final File friends = new File(file.getAbsolutePath(), "friends.txt");
-            final BufferedWriter bw = new BufferedWriter(new FileWriter(friends));
+            File friends = new File(file.getAbsolutePath(), "friends.txt");
+            FileWriter fileWriter = new FileWriter(friends);
 
             for (String friend : Main.friendManager.getFriends()) {
-                bw.write(friend);
-                bw.write("\r\n");
+                fileWriter.write(friend);
+                fileWriter.write("\r\n");
             }
-            bw.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            fileWriter.close();
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
     }
 
     public static void loadFriends(File file) {
         try {
-            final File friends = new File(file.getAbsolutePath(), "friends.txt");
+            File friends = new File(file.getAbsolutePath(), "friends.txt");
 
             if (!friends.exists()) {
                 friends.createNewFile();
                 return;
             }
 
-            final BufferedReader br = new BufferedReader(new FileReader(friends));
+            Scanner scanner = new Scanner(friends);
             final List<String> linezz = Files.readAllLines(friends.toPath());
 
             for (String line : linezz) {
                 Main.friendManager.addFriend(line);
             }
-            br.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            scanner.close();
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
     }
 
     public static void savePrefix(File file, String prefix) {
         try {
-            final File prefixFile = new File(file.getAbsolutePath(), "prefix.txt");
-            final BufferedWriter bw = new BufferedWriter(new FileWriter(prefixFile));
+            File prefixFile = new File(file.getAbsolutePath(), "prefix.txt");
+            FileWriter fileWriter = new FileWriter(prefixFile);
 
-            bw.write(prefix);
-            bw.write("\r\n");
+            fileWriter.write(prefix);
+            fileWriter.write("\r\n");
 
-            bw.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            fileWriter.close();
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
     }
 
     public static void loadPrefix(File file) {
         try {
-            final File prefixFile = new File(file.getAbsolutePath(), "prefix.txt");
+            File prefixFile = new File(file.getAbsolutePath(), "prefix.txt");
 
             if (!prefixFile.exists()) {
                 prefixFile.createNewFile();
                 return;
             }
 
-            final BufferedReader br = new BufferedReader(new FileReader(prefixFile));
+            final FileReader fileReader = new FileReader(prefixFile);
             final List<String> linezz = Files.readAllLines(prefixFile.toPath());
 
             for (String line : linezz) {
                 if (linezz.size() > 1) return;
                 Main.commandManager.setCommandPrefix(line);
             }
-            br.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            fileReader.close();
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
     }
 
