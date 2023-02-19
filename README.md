@@ -44,8 +44,11 @@ How do I...
 ## Huge thanks to:
 
 My friends and contributors of Mousse
+
 [M1zuu](https://github.com/m1zuu-dev) for the dvd logo
+
 [huu-bo](https://github.com/huu-bo) and Jonah for nothing
+
 [Minecraft Forge](https://github.com/MinecraftForge) and Minecraft devs to make this client development possible
 
 (Forgot to mention the ClickGUI was 100% skidded from oyvey sorry)
