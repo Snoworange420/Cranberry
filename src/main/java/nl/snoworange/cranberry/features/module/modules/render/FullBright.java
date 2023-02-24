@@ -54,7 +54,7 @@ public class FullBright extends Module {
         }
 
         if (mode.getValue().equals(Mode.POTION)) {
-            mc.player.addPotionEffect(new PotionEffect(MobEffects.NIGHT_VISION, 8400));
+            mc.player.addPotionEffect(new PotionEffect(MobEffects.NIGHT_VISION, 5200));
         }
     }
 }

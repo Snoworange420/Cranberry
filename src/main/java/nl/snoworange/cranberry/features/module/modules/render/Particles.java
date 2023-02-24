@@ -12,7 +12,10 @@ public class Particles extends Module {
     private static Particles instance;
 
     public Particles() {
-        super("Particles", Category.RENDER);
+        super("Particles",
+                "LAGGGGGGGGGGG",
+                Category.RENDER
+        );
 
         instance = this;
     }

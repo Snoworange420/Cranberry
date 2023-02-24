@@ -28,16 +28,11 @@ public class MixinGuiScreen {
 
     @Shadow
     public int width;
+
     @Shadow
     public int height;
 
-    @Inject(method = "renderToolTip",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    public void renderToolTip(final ItemStack itemStack, final int x, final int y, final CallbackInfo ci) {
-        Tooltip.onRenderTooltip(itemStack, x, y, ci);
-    }
+    private boolean drawBackgroundCancelled;
 
     @Redirect(method = "getItemToolTip",
             at = @At(value = "INVOKE",
@@ -50,7 +45,7 @@ public class MixinGuiScreen {
             if (instance.getTagCompound() != null) {
                 nbtList.add(TextFormatting.GRAY + instance.getTagCompound().toString());
             } else {
-                nbtList.add(TextFormatting.GRAY + "{}");
+                nbtList.add(TextFormatting.GRAY + "No NBT found!");
             }
 
             return nbtList;
@@ -74,7 +69,28 @@ public class MixinGuiScreen {
             cancellable = true
     )
     private void drawWorldBackgroundWrapper(int tint, final CallbackInfo ci) {
+        if (CleanGUI.getInstance().isEnabled()) {
+            if ((CleanGUI.getInstance().removeCGuiTint.getValue()
+                && Minecraft.getMinecraft().currentScreen instanceof GuiContainer) || CleanGUI.getInstance().removeAllGuiTint.getValue()) {
+                ci.cancel();
+                drawBackgroundCancelled = true;
+                drawParticlesAndDvdIcon();
+            } else {
+                drawBackgroundCancelled = false;
+            }
+        } else {
+            drawBackgroundCancelled = false;
+        }
+    }
 
+    @Inject(method = "drawWorldBackground(I)V",
+            at = @At("RETURN")
+    )
+    private void drawStuffOverBackground(int tint, CallbackInfo ci) {
+        if (!drawBackgroundCancelled) drawParticlesAndDvdIcon();
+    }
+
+    private void drawParticlesAndDvdIcon() {
         final ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
         final int width = scaledResolution.getScaledWidth();
         final int height = scaledResolution.getScaledHeight();
@@ -90,19 +106,9 @@ public class MixinGuiScreen {
                 || Minecraft.getMinecraft().currentScreen instanceof GuiConnecting
                 || Minecraft.getMinecraft().currentScreen instanceof GuiSnooper
                 || Minecraft.getMinecraft().currentScreen instanceof GuiDownloadTerrain
-                || Minecraft.getMinecraft().currentScreen instanceof GuiDisconnected)) return;
+                || Minecraft.getMinecraft().currentScreen instanceof GuiDisconnected)
+        ) return;
 
         if (DVDIcon.getInstance().isEnabled() && DVDIcon.getInstance().inOtherGui.getValue()) DVDIcon.getInstance().drawDVDIcon();
-
-        if (Minecraft.getMinecraft().currentScreen instanceof GuiContainer
-                && CleanGUI.getInstance().isEnabled()
-                && CleanGUI.getInstance().removeCGuiTint.getValue()
-        ) {
-            ci.cancel();
-        }
-
-        if (CleanGUI.getInstance().isEnabled() && CleanGUI.getInstance().removeAllGuiTint.getValue()) {
-            ci.cancel();
-        }
     }
 }

@@ -2,7 +2,7 @@ package nl.snoworange.cranberry.mixin.mixins;
 
 import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.multiplayer.ServerData;
-import nl.snoworange.cranberry.features.module.modules.misc.ConnectingGuiPlus;
+import nl.snoworange.cranberry.features.module.modules.misc.BetterConnectingGUI;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,6 +15,6 @@ public class MixinGuiMultiplayer {
             at = @At("HEAD")
     )
     private void onConnectToServer(ServerData server, CallbackInfo ci) {
-        ConnectingGuiPlus.currentServerData = server;
+        BetterConnectingGUI.currentServerData = server;
     }
 }

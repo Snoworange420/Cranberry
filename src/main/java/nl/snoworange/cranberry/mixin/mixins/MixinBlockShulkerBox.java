@@ -9,11 +9,8 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 @Mixin(BlockShulkerBox.class)
 public class MixinBlockShulkerBox {
 
-    @ModifyConstant(
-            method = "addInformation",
-            constant = @Constant(
-                    intValue = 4
-            )
+    @ModifyConstant(method = "addInformation",
+            constant = @Constant(intValue = 4)
     )
     private int tooltipLength(int length) {
         if (Tooltip.getInstance().isEnabled() && Tooltip.getInstance().modifyShulkerInfoLength.getValue()) {

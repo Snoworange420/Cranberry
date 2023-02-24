@@ -79,7 +79,6 @@ public class Tooltip extends Module {
         super.onDisable();
     }
 
-    public static void onRenderTooltip(ItemStack itemStack, int x, int y, CallbackInfo ci) {}
 
     private void setInCache(@Nullable GuiShulkerPreview viewer) {
         if (0 > guiCache.size() - 1) {
@@ -202,10 +201,6 @@ public class Tooltip extends Module {
             this.height = Minecraft.getMinecraft().displayHeight;
             this.xSize = 176;
             this.ySize = 76;
-        }
-
-        public ItemStack getParentShulker() {
-            return shulkerStack;
         }
 
         public int getPosX() {

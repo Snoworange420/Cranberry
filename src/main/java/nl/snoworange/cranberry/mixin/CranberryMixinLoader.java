@@ -30,7 +30,7 @@ public class CranberryMixinLoader implements IFMLLoadingPlugin {
     }
 
     public void injectData(Map<String, Object> data) {
-        isObfuscatedEnvironment = (Boolean)data.get("runtimeDeobfuscationEnabled");
+        isObfuscatedEnvironment = (Boolean) data.get("runtimeDeobfuscationEnabled");
     }
 
     public String getAccessTransformerClass() {

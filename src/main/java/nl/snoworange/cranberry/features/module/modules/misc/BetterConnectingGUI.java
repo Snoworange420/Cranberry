@@ -4,21 +4,20 @@ import net.minecraft.client.multiplayer.ServerData;
 import nl.snoworange.cranberry.features.module.Category;
 import nl.snoworange.cranberry.features.module.Module;
 
-public class ConnectingGuiPlus extends Module {
+public class BetterConnectingGUI extends Module {
 
-    private static ConnectingGuiPlus instance;
+    private static BetterConnectingGUI instance;
 
-    public ConnectingGuiPlus() {
-        super("ConnectingGui+",
-                "Better connecting to the server... gui",
+    public BetterConnectingGUI() {
+        super("BetterConnectingGUI",
                 Category.MISC
         );
 
         instance = this;
     }
 
-    public static ConnectingGuiPlus getInstance() {
-        return instance != null ? instance : new ConnectingGuiPlus();
+    public static BetterConnectingGUI getInstance() {
+        return instance != null ? instance : new BetterConnectingGUI();
     }
 
     public static ServerData currentServerData;

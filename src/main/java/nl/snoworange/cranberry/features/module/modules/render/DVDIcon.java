@@ -1,7 +1,6 @@
 package nl.snoworange.cranberry.features.module.modules.render;
 
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiVideoSettings;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
@@ -9,7 +8,6 @@ import nl.snoworange.cranberry.Main;
 import nl.snoworange.cranberry.features.module.Category;
 import nl.snoworange.cranberry.features.module.Module;
 import nl.snoworange.cranberry.features.setting.Setting;
-import nl.snoworange.cranberry.util.minecraft.ChatUtils;
 
 import java.awt.*;
 import java.util.Random;
@@ -27,12 +25,28 @@ public class DVDIcon extends Module {
         instance = this;
     }
 
+    public enum ColorMode {
+        RANDOM,
+        CLASSIC;
+    }
+
     public static DVDIcon getInstance() {
         return instance != null ? instance : new DVDIcon();
     }
 
     public static final ResourceLocation DVD_ICON = new ResourceLocation(Main.MOD_ID, "dvd.png");
+    public static final Color[] classicColors = new Color[] {
+            new Color(255, 38, 0),
+            new Color(255, 131, 0),
+            new Color(255, 250, 1),
+            new Color(37, 255, 1),
+            new Color(0, 254, 255),
+            new Color(0, 38, 255),
+            new Color(190, 0, 255),
+            new Color(255, 0, 139)
+    };
 
+    public final Setting<Enum> colorMode = register(new Setting<>("ColorMode", ColorMode.RANDOM));
     public final Setting<Boolean> inChat = register(new Setting<>("InChat", true));
     public final Setting<Boolean> inOtherGui = register(new Setting<>("InOtherGui", true));
     public final Setting<Integer> speed = register(new Setting<>("Speed", 2, 1, 5));
@@ -93,9 +107,16 @@ public class DVDIcon extends Module {
     }
 
     public void updateColor() {
-        dvdColor = new Color(new Random().nextInt(256),
-                new Random().nextInt(256),
-                new Random().nextInt(256)
-        );
+        if (colorMode.getValue().equals(ColorMode.RANDOM)) {
+            dvdColor = new Color(new Random().nextInt(256),
+                    new Random().nextInt(256),
+                    new Random().nextInt(256)
+            );
+        }
+
+        if (colorMode.getValue().equals(ColorMode.CLASSIC))  {
+            int random = new Random().nextInt(classicColors.length);
+            dvdColor = classicColors[random];
+        }
     }
 }

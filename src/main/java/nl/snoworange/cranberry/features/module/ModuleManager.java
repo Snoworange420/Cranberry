@@ -15,7 +15,8 @@ import nl.snoworange.cranberry.features.module.modules.combat.PistonElevator;
 import nl.snoworange.cranberry.features.module.modules.combat.Surround;
 import nl.snoworange.cranberry.features.module.modules.exploit.SecretClose;
 import nl.snoworange.cranberry.features.module.modules.hud.Watermark;
-import nl.snoworange.cranberry.features.module.modules.misc.ConnectingGuiPlus;
+import nl.snoworange.cranberry.features.module.modules.misc.BetterConnectingGUI;
+import nl.snoworange.cranberry.features.module.modules.misc.DiscordRPC;
 import nl.snoworange.cranberry.features.module.modules.movement.AutoSprint;
 import nl.snoworange.cranberry.features.module.modules.movement.ElytraFly;
 import nl.snoworange.cranberry.features.module.modules.movement.LiquidSpeed;
@@ -52,7 +53,8 @@ public class ModuleManager {
         modules.add(new FullBright());
         modules.add(new SelectionHighlight());
 
-        modules.add(new ConnectingGuiPlus());
+        modules.add(new BetterConnectingGUI());
+        modules.add(new DiscordRPC());
 
         modules.add(new AutoSprint());
         modules.add(new ElytraFly());
