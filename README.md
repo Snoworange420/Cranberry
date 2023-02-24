@@ -9,6 +9,10 @@ Advanced utility 1.12.2 forge mod, aimed at use in anarchy environments.
 ![GitHub repo size](https://img.shields.io/github/repo-size/Snoworange420/Cranberry)
 [![discord](https://img.shields.io/badge/Discord-Invite-8080c0)](https://discord.gg/wX7cM2DXuy)
 
+## Pull request
+
+- WHEN YOU SEE A CODE THAT SUCKS PLEASE MAKE A PULL REQUEST AND FIX IT IDC
+
 ## Inspirations
 
 - Abyss: SelectionHighlight, DVDIcon (screensaver)
