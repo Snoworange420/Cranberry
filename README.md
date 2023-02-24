@@ -11,7 +11,7 @@ Advanced utility 1.12.2 forge mod, aimed at use in anarchy environments.
 
 ## Pull request and issues
 
-- WHEN YOU SEE A CODE THAT SUCKS PLEASE MAKE A PULL REQUEST AND FIX IT IDC
+- WHEN YOU SEE A CODE THAT SUCKS PLEASE MAKE A PULL REQUEST AND FIX IT IDK
 - When you also have any other idea that can improve the client please post an issue, so I can do stuff
 
 ## Inspirations
