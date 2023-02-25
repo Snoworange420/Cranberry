@@ -9,9 +9,10 @@ Advanced utility 1.12.2 forge mod, aimed at use in anarchy environments.
 ![GitHub repo size](https://img.shields.io/github/repo-size/Snoworange420/Cranberry)
 [![discord](https://img.shields.io/badge/Discord-Invite-8080c0)](https://discord.gg/wX7cM2DXuy)
 
-## Pull request
+## Pull request and issues
 
-- WHEN YOU SEE A CODE THAT SUCKS PLEASE MAKE A PULL REQUEST AND FIX IT IDC
+- WHEN YOU SEE A CODE THAT SUCKS PLEASE MAKE A PULL REQUEST AND FIX IT IDK
+- When you also have any other idea that can improve the client please post an issue, so I can do stuff
 
 ## Inspirations
 
