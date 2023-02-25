@@ -1,6 +1,5 @@
 package nl.snoworange.cranberry.util.minecraft;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -207,5 +206,31 @@ public class RenderUtils {
         GlStateManager.enableCull();
         GlStateManager.enableAlpha();
         GlStateManager.shadeModel(7424);
+    }
+
+    public static void prepareGL() {
+        GL11.glBlendFunc(770, 771);
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.glLineWidth(1.5f);
+        GlStateManager.disableTexture2D();
+        GlStateManager.depthMask(false);
+        GlStateManager.enableBlend();
+        GlStateManager.disableDepth();
+        GlStateManager.disableLighting();
+        GlStateManager.disableCull();
+        GlStateManager.enableAlpha();
+        GlStateManager.color(1.0f, 1.0f, 1.0f);
+    }
+
+    public static void releaseGL() {
+        GlStateManager.enableCull();
+        GlStateManager.depthMask(true);
+        GlStateManager.enableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.enableDepth();
+    }
+
+    public static void glColor(Color color) {
+        GL11.glColor4f(((float) color.getRed() / 255f), ((float) color.getGreen() / 255f), (float)((float) color.getBlue() / 255f), ((float) color.getAlpha() / 255f));
     }
 }

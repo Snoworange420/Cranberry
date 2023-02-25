@@ -9,7 +9,9 @@ public class FastXP extends Module {
 
     public FastXP() {
         super("FastXP",
-                Category.PLAYER);
+                "Modifies right click delay timer when you hold xp",
+                Category.PLAYER
+        );
     }
 
     @Override

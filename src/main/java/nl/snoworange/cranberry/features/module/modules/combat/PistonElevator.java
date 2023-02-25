@@ -34,11 +34,15 @@ public class PistonElevator extends Module {
     public BlockPos holePos;
     public BlockPos redstonePos;
     public EnumFacing pistonDirection;
+    public int tickTimer = 0;
+    public boolean placedPiston = false;
+
 
     public final Setting<Boolean> targetFriends = register(new Setting<>("TargetFriends", false));
     public final Setting<Boolean> rotate = register(new Setting<>("Rotate", true));
     public final Setting<Boolean> swingArm = register(new Setting<>("SwingArm", true));
     public final Setting<Boolean> silent = register(new Setting<>("Silent", false));
+    public final Setting<Integer> placeDelayTicks = register(new Setting<>("PlaceDelayTicks", 5, 0, 20));
     public final Setting<Boolean> autoDisable = register(new Setting<>("AutoDisable", true));
     public final Setting<Double> maxRange = register(new Setting<>("MaxTargetRange", 5.5, 0.1, 7.0));
     public final Setting<Double> maxPlaceRange = register(new Setting<>("MaxPlaceRange", 6.0, 0.1, 7.0));
@@ -60,12 +64,16 @@ public class PistonElevator extends Module {
         basePos = null;
         holePos = null;
         redstonePos = null;
+        tickTimer = 0;
+        placedPiston = false;
     }
 
     @Override
     public void onTick() {
 
         if (n()) return;
+
+        if (placedPiston) tickTimer++;
 
         int pistonIndex = InventoryUtils.findHotbarPiston();
         int redstoneIndex = InventoryUtils.findHotbarItem(Item.getItemFromBlock(Blocks.REDSTONE_BLOCK));
@@ -119,6 +127,8 @@ public class PistonElevator extends Module {
             placeBlock(basePos);
             update(mc.player.inventory.currentItem, silent.getValue());
 
+            placedPiston = true;
+
             phase = 2;
         }
 
@@ -126,16 +136,18 @@ public class PistonElevator extends Module {
 
             if (redstonePos == null) return;
 
-            update(redstoneIndex, silent.getValue());
-            placeBlock(redstonePos);
+            if (tickTimer >= placeDelayTicks.getValue()) {
+                update(redstoneIndex, silent.getValue());
+                placeBlock(redstonePos);
 
-            mc.player.connection.sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem));
+                mc.player.connection.sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem));
 
-            if (autoDisable.getValue()) {
-                disable();
-                phase = 3;
-            } else {
-                reset();
+                if (autoDisable.getValue()) {
+                    disable();
+                    phase = 3;
+                } else {
+                    reset();
+                }
             }
         }
     }

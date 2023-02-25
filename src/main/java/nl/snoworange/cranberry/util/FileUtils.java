@@ -159,14 +159,13 @@ public class FileUtils {
                 return;
             }
 
-            FileReader fileReader = new FileReader(prefixFile);
-            List<String> linezz = Files.readAllLines(prefixFile.toPath());
+            final FileReader fileReader = new FileReader(prefixFile);
+            final List<String> linezz = Files.readAllLines(prefixFile.toPath());
 
             for (String line : linezz) {
                 if (linezz.size() > 1) return;
                 Main.commandManager.setCommandPrefix(line);
             }
-
             fileReader.close();
         } catch (Exception exception) {
             exception.printStackTrace();
@@ -302,7 +301,6 @@ public class FileUtils {
                 if (setting.isEnumSetting()) {
                     EnumConverter converter = new EnumConverter(((Enum) setting.getValue()).getClass());
                     object.add(setting.getName(), converter.doForward((Enum) setting.getValue()));
-
                     continue;
                 }
 

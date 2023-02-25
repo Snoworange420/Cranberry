@@ -1,13 +1,19 @@
 package nl.snoworange.cranberry.features.module.modules.render;
 
+import com.mojang.authlib.GameProfile;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
+import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import nl.snoworange.cranberry.features.module.Category;
 import nl.snoworange.cranberry.features.module.Module;
 import nl.snoworange.cranberry.features.setting.Setting;
+
+import java.util.UUID;
 
 public class DeathEffects extends Module {
 
@@ -41,6 +47,8 @@ public class DeathEffects extends Module {
             if (player.deathTime == 1) {
                 if (effect.getValue().equals(Effects.LIGHTNING)) {
                     summonLightning(player.posX, player.posY, player.posZ);
+                } else if (effect.getValue().equals(Effects.TEST)) {
+
                 }
             }
         }

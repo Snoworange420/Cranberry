@@ -21,6 +21,7 @@ import nl.snoworange.cranberry.util.Timer;
 
 /**
  * @author CinnamonApple
+ * @author Snoworange
  */
 
 public class Auto32k extends Module {

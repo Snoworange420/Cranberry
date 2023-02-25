@@ -17,11 +17,13 @@ import nl.snoworange.cranberry.features.module.modules.exploit.SecretClose;
 import nl.snoworange.cranberry.features.module.modules.hud.Watermark;
 import nl.snoworange.cranberry.features.module.modules.misc.BetterConnectingGUI;
 import nl.snoworange.cranberry.features.module.modules.misc.DiscordRPC;
+import nl.snoworange.cranberry.features.module.modules.misc.FakePlayer;
 import nl.snoworange.cranberry.features.module.modules.movement.AutoSprint;
 import nl.snoworange.cranberry.features.module.modules.movement.ElytraFly;
 import nl.snoworange.cranberry.features.module.modules.movement.LiquidSpeed;
 import nl.snoworange.cranberry.features.module.modules.player.FastXP;
 import nl.snoworange.cranberry.features.module.modules.render.*;
+import nl.snoworange.cranberry.features.module.modules.render.popchams.PopChams;
 import nl.snoworange.cranberry.features.module.modules.stronkswordmeta.*;
 import org.lwjgl.input.Keyboard;
 
@@ -52,9 +54,11 @@ public class ModuleManager {
         modules.add(new DVDIcon());
         modules.add(new FullBright());
         modules.add(new SelectionHighlight());
+        modules.add(new PopChams());
 
         modules.add(new BetterConnectingGUI());
         modules.add(new DiscordRPC());
+        modules.add(new FakePlayer());
 
         modules.add(new AutoSprint());
         modules.add(new ElytraFly());

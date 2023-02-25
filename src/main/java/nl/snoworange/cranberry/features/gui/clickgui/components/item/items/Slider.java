@@ -68,15 +68,51 @@ public class Slider extends Button {
     }
 
     private void setSettingFromX(int mouseX) {
+
         float percent = ((float) mouseX - this.x) / ((float) this.width + 7.4f);
+
         if (this.setting.getValue() instanceof Double) {
             double result = (Double) this.setting.getMin() + (double) ((float) this.difference * percent);
-            this.setting.setValue((double) Math.round(10.0 * result) / 10.0);
+
+            double value = (double) Math.round(10.0 * result) / 10.0;
+
+            if (value > (double) max) {
+                value = (double) max;
+            }
+
+            if (value < (double) min) {
+                value = (double) min;
+            }
+
+            this.setting.setValue(value);
         } else if (this.setting.getValue() instanceof Float) {
+
             float result = ((Float) this.setting.getMin()).floatValue() + (float) this.difference * percent;
-            this.setting.setValue(Float.valueOf((float) Math.round(10.0f * result) / 10.0f));
+
+            float value = Float.valueOf((float) Math.round(10.0f * result) / 10.0f);
+
+            if (value > (float) max) {
+                value = (float) max;
+            }
+
+            if (value < (float) min) {
+                value = (float) min;
+            }
+
+            this.setting.setValue(value);
         } else if (this.setting.getValue() instanceof Integer) {
-            this.setting.setValue((Integer) this.setting.getMin() + (int) ((float) this.difference * percent));
+
+            int value = (Integer) this.setting.getMin() + (int) ((float) this.difference * percent);
+
+            if (value > (int) max) {
+                value = (int) max;
+            }
+
+            if (value < (int) min) {
+                value = (int) min;
+            }
+
+            this.setting.setValue(value);
         }
     }
 

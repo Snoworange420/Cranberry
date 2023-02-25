@@ -12,6 +12,10 @@ import nl.snoworange.cranberry.features.setting.Setting;
 import java.awt.*;
 import java.util.Random;
 
+/**
+ * @author Snoworange
+ */
+
 public class DVDIcon extends Module {
 
     private static DVDIcon instance;
@@ -69,7 +73,7 @@ public class DVDIcon extends Module {
         super.onDisable();
 
         x = 69;
-        y = 42;
+        y = 69;
     }
 
     public Color dvdColor = new Color(212, 61, 89);
@@ -98,7 +102,7 @@ public class DVDIcon extends Module {
         GlStateManager.color( (float) dvdColor.getRed() / 255,
                 (float) dvdColor.getBlue() / 255,
                 (float) dvdColor.getGreen() / 255,
-                1F
+                1f
         );
 
 

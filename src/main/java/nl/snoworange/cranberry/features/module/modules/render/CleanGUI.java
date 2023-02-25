@@ -11,7 +11,8 @@ public class CleanGUI extends Module {
     public CleanGUI() {
         super("CleanGUI",
                 "Removes tint in guis",
-                Category.RENDER);
+                Category.RENDER
+        );
 
         instance = this;
     }
