@@ -304,7 +304,7 @@ public class Tooltip extends Module {
                 GlStateManager.colorMask(true, true, true, true);
 
                 //tooltip of the item itself
-                GlStateManager.color(1.f, 1.f, 1.f, 1.0f);
+                GlStateManager.color(1f, 1f, 1f, 1f);
                 GlStateManager.pushMatrix();
                 generatingShulkerTooltip = true;
                 renderToolTip(hoveringOver.getStack(), mouseX, mouseY);
@@ -316,7 +316,7 @@ public class Tooltip extends Module {
             isMouseInShulkerGui = isPointInRegion(this.posX, this.posY, getWidth(), getHeight(), mouseX, mouseY);
 
             GlStateManager.disableBlend();
-            GlStateManager.color(1.f, 1.f, 1.f, 1.0f);
+            GlStateManager.color(1f, 1f, 1f, 1f);
         }
 
         @Override
