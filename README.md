@@ -12,7 +12,7 @@ Advanced utility 1.12.2 forge mod, aimed at use in anarchy environments.
 ## Pull request and issues
 
 - If you have any idea that should improve the client, feel free to post an issue, so I can work on (?)
-- For support, join the discord server.
+- For support, join the [(discord server.)](https://discord.gg/wX7cM2DXuy)
 
 ## Inspirations
 
