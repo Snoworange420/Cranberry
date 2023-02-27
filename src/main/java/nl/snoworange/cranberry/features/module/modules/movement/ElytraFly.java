@@ -64,6 +64,11 @@ public class ElytraFly extends Module {
     }
 
     @Override
+    public void init() {
+        this.setModuleStack(new ItemStack(Items.ELYTRA));
+    }
+
+    @Override
     public void onTick() {
 
         if (n()) return;

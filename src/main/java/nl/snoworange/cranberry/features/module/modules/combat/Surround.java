@@ -3,6 +3,7 @@ package nl.snoworange.cranberry.features.module.modules.combat;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayer;
@@ -16,6 +17,7 @@ import nl.snoworange.cranberry.features.setting.Setting;
 import nl.snoworange.cranberry.util.minecraft.BlockUtils;
 import nl.snoworange.cranberry.util.minecraft.ChatUtils;
 import nl.snoworange.cranberry.util.minecraft.InventoryUtils;
+import nl.snoworange.cranberry.util.minecraft.PlayerUtils;
 
 public class Surround extends Module {
 
@@ -33,6 +35,7 @@ public class Surround extends Module {
 
     public BlockPos middlePos;
     public int phase = 0;
+    public int originalSlot = -1;
 
     public final Setting<Enum> mode = register(new Setting<>("Mode", Mode.OBSIDIAN));
     public final Setting<Boolean> silent = register(new Setting<>("Silent", true));
@@ -48,15 +51,20 @@ public class Surround extends Module {
 
         middlePos = null;
         phase = 0;
+
+        if (!n()) {
+            originalSlot = mc.player.inventory.currentItem;
+        }
     }
 
     @Override
     public void onDisable() {
         super.onDisable();
+    }
 
-        if (!n()) {
-            update(mc.player.inventory.currentItem, false);
-        }
+    @Override
+    public void init() {
+        this.setModuleStack(new ItemStack(Item.getItemFromBlock(Blocks.OBSIDIAN)));
     }
 
     @Override
@@ -69,14 +77,14 @@ public class Surround extends Module {
         int stainedGlassIndex = InventoryUtils.findHotbarItem(Item.getItemFromBlock(Blocks.STAINED_GLASS));
 
         if (mode.getValue().equals(Mode.OBSIDIAN) && obsidianIndex == -1) {
-            ChatUtils.sendMessage("No obsidian found in your hotbar!");
+
+            error("No glass found in your hotbar!");
 
             disable();
             return;
-        }
+        } else if (mode.getValue().equals(Mode.GLASS) && (glassIndex == -1 && stainedGlassIndex == -1)) {
 
-        if (mode.getValue().equals(Mode.GLASS) && (glassIndex == -1 && stainedGlassIndex == -1)) {
-            ChatUtils.sendMessage("No glass found in your hotbar!");
+            error("No glass found in your hotbar!");
 
             disable();
             return;
@@ -87,10 +95,7 @@ public class Surround extends Module {
                 middlePos = new BlockPos(new Vec3d(mc.player.posX, mc.player.posY, mc.player.posZ));
 
                 if (centerTp.getValue()) {
-                    double centerX = Math.floor(mc.player.posX) + 0.5;
-                    double centerZ = Math.floor(mc.player.posZ) + 0.5;
-                    mc.player.setPosition(centerX, mc.player.posY, centerZ);
-                    mc.player.connection.sendPacket(new CPacketPlayer.Position(centerX, mc.player.posY, centerZ, mc.player.onGround));
+                    PlayerUtils.teleportPlayerToCenter();
                 }
 
                 phase = 1;
@@ -99,9 +104,13 @@ public class Surround extends Module {
 
         if (phase == 1) {
 
-            if (jumpDisable.getValue() && ((mc.player.posY - 0.9) > middlePos.getY() || (mc.player.posY + 0.9) < middlePos.getY())) disable();
-
-            if (disableOnBigDistance.getValue() && mc.player.getDistanceSq(middlePos) > 1.1D) disable();
+            if (jumpDisable.getValue() && ((mc.player.posY - 0.9) > middlePos.getY() || (mc.player.posY + 0.9) < middlePos.getY())) {
+                disable();
+                return;
+            } else if (disableOnBigDistance.getValue() && mc.player.getDistanceSq(middlePos) > 1.1D) {
+                disable();
+                return;
+            }
 
             if (mode.getValue().equals(Mode.OBSIDIAN)) {
                 for (EnumFacing facing : EnumFacing.HORIZONTALS) {
@@ -110,7 +119,8 @@ public class Surround extends Module {
                         if (mc.player.onGround) {
                             update(obsidianIndex, silent.getValue());
                             placeBlock(middlePos.offset(facing));
-                            update(mc.player.inventory.currentItem, false);
+
+                            if (originalSlot != -1) update(originalSlot, false);
                         }
                     }
                 }
@@ -123,7 +133,8 @@ public class Surround extends Module {
                         if (mc.player.onGround) {
                             update(glassIndex != -1 ? glassIndex : stainedGlassIndex, silent.getValue());
                             placeBlock(middlePos.offset(facing));
-                            update(mc.player.inventory.currentItem, false);
+
+                            if (originalSlot != -1) update(originalSlot, false);
                         }
                     }
                 }

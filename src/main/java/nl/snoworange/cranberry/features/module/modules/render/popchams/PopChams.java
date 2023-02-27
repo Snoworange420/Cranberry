@@ -50,7 +50,7 @@ public class PopChams extends Module {
     public final Setting<Integer> outlineRed = register(new Setting<>("OutlineRed", 244, 0, 255));
     public final Setting<Integer> outlineGreen = register(new Setting<>("OutlineGreen", 244, 0, 255));
     public final Setting<Integer> outlineBlue = register(new Setting<>("OutlineBlue", 244, 0, 255));
-    public final Setting<Integer> outlineAlpha = register(new Setting<>("OutlineAlpha", 65, 0, 255));
+    public final Setting<Integer> outlineAlpha = register(new Setting<>("OutlineAlpha", 220, 0, 255));
     public final Setting<Float> lineWidth = register(new Setting<>("LineWidth", 1.0f, 0.1f, 3.5f));
 
 

@@ -29,13 +29,13 @@ public class SelectionHighlight extends Module {
         super.onDisable();
     }
 
-    public final Setting<Integer> h1 = register(new Setting<>("Hue1", 270, 0, 360));
-    public final Setting<Integer> s1 = register(new Setting<>("Saturation1", 287, 0, 360));
-    public final Setting<Integer> l1 = register(new Setting<>("Lightness1", 220, 0, 360));
-    public final Setting<Integer> h2 = register(new Setting<>("Hue2", 220, 0, 360));
-    public final Setting<Integer> s2 = register(new Setting<>("Saturation2", 200, 0, 360));
-    public final Setting<Integer> l2 = register(new Setting<>("Lightness2", 230, 0, 360));
-    public final Setting<Float> lineWidth = register(new Setting<>("LineWidth", 2.5f, 0.1f, 7.5f));
+    public final Setting<Integer> h1 = register(new Setting<>("Hue1", 0, 0, 360));
+    public final Setting<Integer> s1 = register(new Setting<>("Saturation1", 360, 0, 360));
+    public final Setting<Integer> l1 = register(new Setting<>("Lightness1", 280, 0, 360));
+    public final Setting<Integer> h2 = register(new Setting<>("Hue2", 45, 0, 360));
+    public final Setting<Integer> s2 = register(new Setting<>("Saturation2", 320, 0, 360));
+    public final Setting<Integer> l2 = register(new Setting<>("Lightness2", 290, 0, 360));
+    public final Setting<Float> lineWidth = register(new Setting<>("LineWidth", 3.0f, 0.1f, 7.5f));
     public final Setting<Boolean> rainbow = register(new Setting<>("Rainbow", false));
     public final Setting<Integer> rainbowSpeed = register(new Setting<>("RainbowSpeed", 75, 0, 100));
     public final Setting<Integer> rainbowDelay = register(new Setting<>("RainbowDelay", 450, 0, 1000));

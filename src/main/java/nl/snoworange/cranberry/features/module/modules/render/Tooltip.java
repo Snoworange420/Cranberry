@@ -25,7 +25,6 @@ import nl.snoworange.cranberry.features.setting.Setting;
 import nl.snoworange.cranberry.util.minecraft.ChatUtils;
 import nl.snoworange.cranberry.util.minecraft.InventoryUtils;
 import org.lwjgl.input.Keyboard;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -81,7 +80,7 @@ public class Tooltip extends Module {
 
 
     private void setInCache(@Nullable GuiShulkerPreview viewer) {
-        if (0 > guiCache.size() - 1) {
+        if (guiCache.size() - 1 < 0) {
             guiCache.add(0, viewer);
         } else {
             guiCache.set(0, viewer);

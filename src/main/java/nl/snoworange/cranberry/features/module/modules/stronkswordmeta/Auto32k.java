@@ -32,6 +32,7 @@ public class Auto32k extends Module {
     public BlockPos redstonePos;
     public EnumFacing dispenserDirection;
     public boolean placeVertically;
+    public int originalSlot = -1;
 
     Timer timer = new Timer();
 
@@ -68,6 +69,8 @@ public class Auto32k extends Module {
         tempBasePos = null;
         dispenserDirection = null;
 
+        if (!n()) originalSlot = mc.player.inventory.currentItem;
+
         timer.reset();
     }
 
@@ -80,7 +83,8 @@ public class Auto32k extends Module {
                 mc.player.closeScreen();
             }
 
-            mc.player.connection.sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem));
+            if (originalSlot != -1 && !selectSwordSlot.getValue()) update(originalSlot, false);
+
             mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
         }
     }
@@ -103,19 +107,19 @@ public class Auto32k extends Module {
         if (phase == 0 && (hopperIndex == -1 || dispenserIndex == -1 || redstoneIndex == -1 || shulkerIndex == -1)) {
 
             if (hopperIndex == -1) {
-                ChatUtils.sendMessage("Missing hopper in your hotbar!");
+                error("Missing hopper in your hotbar!");
             }
 
             if (dispenserIndex == -1) {
-                ChatUtils.sendMessage("Missing dispenser in your hotbar!");
+                error("Missing dispenser in your hotbar!");
             }
 
             if (redstoneIndex == -1) {
-                ChatUtils.sendMessage("Missing redstone block in your hotbar!");
+                error("Missing redstone block in your hotbar!");
             }
 
             if (shulkerIndex == -1) {
-                ChatUtils.sendMessage((checkFor32kShulks.getValue() ?
+                error((checkFor32kShulks.getValue() ?
                         "Cannot find a valid shulker box with 32k's in your inventory!"
                         :  "Cannot find shulker box in your inventory!"
                 ));
@@ -151,7 +155,7 @@ public class Auto32k extends Module {
 
         if (phase == 1) {
 
-            if (debug.getValue()) ChatUtils.sendMessage("Start placing " + (placeVertically ? "vertically" : "normal") + " 32k @ " + basePos.getX() + " " + basePos.getY() + " " + basePos.getZ() + " facing " + dispenserDirection.getOpposite().getName());
+            if (debug.getValue()) info("Start placing " + (placeVertically ? "vertically" : "normal") + " 32k @ " + basePos.getX() + " " + basePos.getY() + " " + basePos.getZ() + " facing " + dispenserDirection.getOpposite().getName());
 
             mc.player.setSprinting(false);
 
@@ -223,7 +227,7 @@ public class Auto32k extends Module {
                     //mousebutton 0, important!11!!
                     mc.playerController.windowClick(mc.player.openContainer.windowId, shulkerIndex, 0, ClickType.QUICK_MOVE, mc.player);
 
-                    if (debug.getValue()) ChatUtils.sendMessage("Swapped shulker box @ slot " + shulkerIndex + " into dispenser");
+                    if (debug.getValue()) info("Swapped shulker box @ slot " + shulkerIndex + " into dispenser");
                 }
 
                 if (skipShulkerCheck.getValue()) {
@@ -252,7 +256,8 @@ public class Auto32k extends Module {
                 phase = 4;
 
             } else {
-                ChatUtils.sendMessage("Coudn't find any valid redstone placement! disabling...");
+                error("Coudn't find any valid redstone placement! disabling...");
+
                 disable();
                 return;
             }
@@ -324,11 +329,11 @@ public class Auto32k extends Module {
 
                 if (selectSwordSlot.getValue()) update((airIndex != -1 ? airIndex : (revertedSwordIndex != -1 ? revertedSwordIndex : mc.player.inventory.currentItem)), false);
 
-                if (debug.getValue()) ChatUtils.sendMessage("32k found in slot " + overenchantedSwordIndex);
+                if (debug.getValue()) info("32k found in slot " + overenchantedSwordIndex);
 
                 if (autoClose.getValue() && mc.currentScreen instanceof GuiHopper) mc.player.closeScreen();
 
-                if (debug.getValue()) ChatUtils.sendMessage("Process ended in " + timer.getPassedTimeMs() + " ms");
+                if (debug.getValue()) info("Process ended in " + timer.getPassedTimeMs() + " ms");
 
                 disable();
 

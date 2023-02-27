@@ -56,7 +56,7 @@ public class DVDIcon extends Module {
     public final Setting<Integer> speed = register(new Setting<>("Speed", 2, 1, 5));
 
     public int x = 69;
-    public int y = 42;
+    public int y = 69;
     public int vx = 2;
     public int vy = 2;
 
@@ -111,6 +111,7 @@ public class DVDIcon extends Module {
     }
 
     public void updateColor() {
+
         if (colorMode.getValue().equals(ColorMode.RANDOM)) {
             dvdColor = new Color(new Random().nextInt(256),
                     new Random().nextInt(256),
@@ -122,5 +123,6 @@ public class DVDIcon extends Module {
             int random = new Random().nextInt(classicColors.length);
             dvdColor = classicColors[random];
         }
+
     }
 }

@@ -1,5 +1,9 @@
 package nl.snoworange.cranberry.features.module.modules.movement;
 
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import nl.snoworange.cranberry.features.module.Category;
 import nl.snoworange.cranberry.features.module.Module;
 import nl.snoworange.cranberry.features.setting.Setting;
@@ -23,6 +27,11 @@ public class LiquidSpeed extends Module {
     @Override
     public void onDisable() {
         super.onDisable();
+    }
+
+    @Override
+    public void init() {
+        this.setModuleStack(new ItemStack(Items.WATER_BUCKET));
     }
 
     @Override

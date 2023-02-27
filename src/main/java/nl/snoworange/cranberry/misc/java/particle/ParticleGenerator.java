@@ -43,6 +43,7 @@ public class ParticleGenerator {
         prevHeight = Minecraft.getMinecraft().displayHeight;
 
         for (final Particle particle : particles) {
+
             particle.fall();
             particle.interpolation();
 

@@ -2,6 +2,10 @@ package nl.snoworange.cranberry.features.module;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -10,14 +14,10 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import nl.snoworange.cranberry.Main;
 import nl.snoworange.cranberry.features.gui.clickgui.CranberryClickGUI;
-import nl.snoworange.cranberry.features.module.modules.combat.AutoTotem;
-import nl.snoworange.cranberry.features.module.modules.combat.PistonElevator;
-import nl.snoworange.cranberry.features.module.modules.combat.Surround;
+import nl.snoworange.cranberry.features.module.modules.combat.*;
 import nl.snoworange.cranberry.features.module.modules.exploit.SecretClose;
 import nl.snoworange.cranberry.features.module.modules.hud.Watermark;
-import nl.snoworange.cranberry.features.module.modules.misc.BetterConnectingGUI;
-import nl.snoworange.cranberry.features.module.modules.misc.DiscordRPC;
-import nl.snoworange.cranberry.features.module.modules.misc.FakePlayer;
+import nl.snoworange.cranberry.features.module.modules.misc.*;
 import nl.snoworange.cranberry.features.module.modules.movement.AutoSprint;
 import nl.snoworange.cranberry.features.module.modules.movement.ElytraFly;
 import nl.snoworange.cranberry.features.module.modules.movement.LiquidSpeed;
@@ -42,6 +42,8 @@ public class ModuleManager {
         modules.add(new AutoTotem());
         modules.add(new Surround());
         modules.add(new PistonElevator());
+        modules.add(new SelfAnvil());
+        modules.add(new AutoAnvil());
 
         modules.add(new SecretClose());
 
@@ -59,6 +61,7 @@ public class ModuleManager {
         modules.add(new BetterConnectingGUI());
         modules.add(new DiscordRPC());
         modules.add(new FakePlayer());
+        modules.add(new Announcer());
 
         modules.add(new AutoSprint());
         modules.add(new ElytraFly());
@@ -187,5 +190,24 @@ public class ModuleManager {
         });
 
         return modulesCategory;
+    }
+
+    public ItemStack getDisplayStack(Module module) {
+
+        if (module.getModuleStack() == null) {
+
+            if (module.getCategory() == null) return new ItemStack(Items.SHULKER_SHELL);
+
+            if (module.getCategory().equals(Category.COMBAT)) return new ItemStack(Items.IRON_SWORD);
+            if (module.getCategory().equals(Category.EXPLOIT)) return new ItemStack(Item.getItemFromBlock(Blocks.MOB_SPAWNER));
+            if (module.getCategory().equals(Category.RENDER)) return new ItemStack(Items.ENDER_EYE);
+            if (module.getCategory().equals(Category.MOVEMENT)) return new ItemStack(Items.MINECART);
+            if (module.getCategory().equals(Category.PLAYER)) return new ItemStack(Items.SKULL, 1, 3);
+            if (module.getCategory().equals(Category.MISC)) return new ItemStack(Item.getItemFromBlock(Blocks.REPEATING_COMMAND_BLOCK), 1, 1);
+            if (module.getCategory().equals(Category.STRONKSWORDMETA)) return new ItemStack(Item.getItemFromBlock(Blocks.DISPENSER));
+            if (module.getCategory().equals(Category.HUD)) return new ItemStack(Items.ENDER_PEARL);
+        }
+
+        return module.getModuleStack();
     }
 }

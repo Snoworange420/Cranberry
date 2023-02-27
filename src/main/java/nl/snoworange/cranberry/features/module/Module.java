@@ -3,8 +3,13 @@ package nl.snoworange.cranberry.features.module;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.MinecraftForge;
+import nl.snoworange.cranberry.Main;
+import nl.snoworange.cranberry.features.module.modules.misc.Announcer;
+import nl.snoworange.cranberry.features.notification.minecraft.NotificationToast;
 import nl.snoworange.cranberry.features.setting.Bind;
 import nl.snoworange.cranberry.features.setting.Setting;
 import nl.snoworange.cranberry.util.minecraft.ChatUtils;
@@ -22,7 +27,9 @@ public class Module {
     public String displayName;
     public boolean toggled;
     public boolean visible;
+    public ItemStack moduleStack = null;
     public List<Setting> settings = new ArrayList<Setting>();
+
 
     public Module(String name, Category category) {
         this.name = name;
@@ -31,6 +38,8 @@ public class Module {
         this.displayName = name;
         this.toggled = false;
         this.visible = true;
+
+        init();
     }
 
     public Module(String name, String description, Category category) {
@@ -40,6 +49,8 @@ public class Module {
         this.displayName = name;
         this.toggled = false;
         this.visible = true;
+
+        init();
     }
 
     public Module(String name, String description, Category category, boolean visible) {
@@ -49,6 +60,8 @@ public class Module {
         this.displayName = name;
         this.toggled = false;
         this.visible = visible;
+
+        init();
     }
 
     public Module(String name, String description, Category category, String displayName) {
@@ -58,9 +71,19 @@ public class Module {
         this.displayName = displayName;
         this.toggled = false;
         this.visible = true;
+
+        init();
     }
 
     //stuff
+    public ItemStack getModuleStack() {
+        return this.moduleStack;
+    }
+
+    public void setModuleStack(ItemStack itemStack) {
+        this.moduleStack = itemStack;
+    }
+
 
     public void enable() {
         onEnable();
@@ -75,13 +98,70 @@ public class Module {
     public void onEnable() {
         MinecraftForge.EVENT_BUS.register(this);
 
-        ChatUtils.sendTempMessage("{}" + TextFormatting.GREEN + " enabled.", this.displayName);
+        if (Announcer.getInstance().annouceModuleEvent.getValue()) {
+
+            if (Announcer.getInstance().shouldAnnounceInChat()) {
+                ChatUtils.sendTempMessage("{}" + TextFormatting.GREEN + " enabled.", this.displayName);
+            }
+
+            if (Announcer.getInstance().shouldAnnounceInToast() && !n()) {
+                mc.getToastGui().add(new NotificationToast(Main.NAME,
+                        this.displayName + TextFormatting.GREEN + " enabled." + TextFormatting.RESET,
+                        Main.moduleManager.getDisplayStack(this)
+                ));
+            }
+        }
     }
 
     public void onDisable() {
         MinecraftForge.EVENT_BUS.unregister(this);
 
-        ChatUtils.sendTempMessage("{}" + TextFormatting.RED + " disabled.", this.displayName);
+        if (Announcer.getInstance().annouceModuleEvent.getValue()) {
+
+            if (Announcer.getInstance().shouldAnnounceInChat()) {
+                ChatUtils.sendTempMessage("{}" + TextFormatting.RED + " disabled.", this.displayName);
+            }
+
+            if (Announcer.getInstance().shouldAnnounceInToast() && !n()) {
+                mc.getToastGui().add(new NotificationToast(Main.NAME,
+                        this.displayName + TextFormatting.RED + " disabled." + TextFormatting.RESET,
+                        Main.moduleManager.getDisplayStack(this)
+                ));
+            }
+        }
+    }
+
+    public void info(String message) {
+
+        Main.LOGGER.info(message);
+
+        if (Announcer.getInstance().shouldAnnounceInChat()) ChatUtils.sendMessage(message);
+
+        if (Announcer.getInstance().shouldAnnounceInToast() && !n()) {
+            mc.getToastGui().add(new NotificationToast(Main.NAME,
+                    message,
+                    Main.moduleManager.getDisplayStack(this)
+            ));
+        }
+    }
+
+    public void error(String message) {
+
+        Main.LOGGER.error(message);
+
+        //always display error message in chat
+        ChatUtils.sendMessage(TextFormatting.RESET + message + TextFormatting.RESET);
+
+        if (Announcer.getInstance().shouldAnnounceInToast() && Announcer.getInstance().warnInToast.getValue() && !n()) {
+            mc.getToastGui().add(new NotificationToast(Main.NAME,
+                    TextFormatting.DARK_RED + message + TextFormatting.RESET,
+                    Main.moduleManager.getDisplayStack(this)
+            ));
+        }
+    }
+
+    public void init() {
+
     }
 
     public void onTick() {}
@@ -197,7 +277,7 @@ public class Module {
     }
 
     //I have to put it here, so I won't crash lmao
-    public Setting<Bind> bind = register(new Setting<Bind>("Keybind", new Bind(-1)));
+    public Setting<Bind> bind = register(new Setting<>("Keybind", new Bind(-1)));
 
     public Setting getSettingByName(String name) {
         for (Setting setting : this.settings) {

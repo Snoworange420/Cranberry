@@ -30,8 +30,8 @@ public class Watermark extends Module {
     }
 
     public final Setting<Enum> mode = register(new Setting("Mode", Mode.INCLUDEVERSION));
-    public final Setting<Integer> x = register(new Setting<>("X", 5, 0, 1080));
-    public final Setting<Integer> y = register(new Setting<>("Y", 5, 0, 1080));
+    public final Setting<Integer> x = register(new Setting<>("X", 2, 0, 1080));
+    public final Setting<Integer> y = register(new Setting<>("Y", 12, 0, 1080));
     public final Setting<Integer> red = register(new Setting<>("Red", 166, 0, 255));
     public final Setting<Integer> blue = register(new Setting<>("Blue", 10, 0, 255));
     public final Setting<Integer> green = register(new Setting<>("Green", 61, 0, 255));

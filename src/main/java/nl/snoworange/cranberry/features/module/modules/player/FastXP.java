@@ -1,6 +1,10 @@
 package nl.snoworange.cranberry.features.module.modules.player;
 
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemExpBottle;
+import net.minecraft.item.ItemStack;
 import nl.snoworange.cranberry.features.module.Category;
 import nl.snoworange.cranberry.features.module.Module;
 import nl.snoworange.cranberry.mixin.mixins.IMinecraft;
@@ -22,6 +26,11 @@ public class FastXP extends Module {
     @Override
     public void onDisable() {
         super.onDisable();
+    }
+
+    @Override
+    public void init() {
+        this.setModuleStack(new ItemStack(Items.EXPERIENCE_BOTTLE));
     }
 
     @Override

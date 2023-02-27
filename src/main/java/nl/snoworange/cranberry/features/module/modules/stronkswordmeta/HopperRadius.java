@@ -1,6 +1,9 @@
 package nl.snoworange.cranberry.features.module.modules.stronkswordmeta;
 
 import net.minecraft.block.BlockHopper;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketCloseWindow;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.server.SPacketCloseWindow;
@@ -53,6 +56,11 @@ public class HopperRadius extends Module {
     @Override
     public void onDisable() {
         super.onDisable();
+    }
+
+    @Override
+    public void init() {
+        this.setModuleStack(new ItemStack(Item.getItemFromBlock(Blocks.HOPPER)));
     }
 
     @Override

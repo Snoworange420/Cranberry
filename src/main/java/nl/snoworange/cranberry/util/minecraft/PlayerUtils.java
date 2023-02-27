@@ -7,6 +7,7 @@ import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -46,7 +47,7 @@ public class PlayerUtils {
         BlockPos[] arrayOfBlockPos1;
         int i;
         byte b;
-        for (arrayOfBlockPos1 = touchingBlocks = new BlockPos[] { blockPos.north(), blockPos.south(), blockPos.east(), blockPos.west(), blockPos.down() }, i = arrayOfBlockPos1.length, b = 0; b < i; ) {
+        for (arrayOfBlockPos1 = touchingBlocks = new BlockPos[] { blockPos.north(), blockPos.south(), blockPos.east(), blockPos.west() }, i = arrayOfBlockPos1.length, b = 0; b < i; ) {
             BlockPos pos = arrayOfBlockPos1[b];
             IBlockState touchingState = mc.world.getBlockState(pos);
             if (touchingState.getBlock() != Blocks.AIR && touchingState.getBlock() == Blocks.OBSIDIAN) {
@@ -63,7 +64,7 @@ public class PlayerUtils {
         BlockPos[] arrayOfBlockPos1;
         int i;
         byte b;
-        for (arrayOfBlockPos1 = touchingBlocks = new BlockPos[] { blockPos.north(), blockPos.south(), blockPos.east(), blockPos.west(), blockPos.down() }, i = arrayOfBlockPos1.length, b = 0; b < i; ) {
+        for (arrayOfBlockPos1 = touchingBlocks = new BlockPos[] { blockPos.north(), blockPos.south(), blockPos.east(), blockPos.west() }, i = arrayOfBlockPos1.length, b = 0; b < i; ) {
             BlockPos pos = arrayOfBlockPos1[b];
             IBlockState touchingState = mc.world.getBlockState(pos);
             if (touchingState.getBlock() != Blocks.AIR && touchingState.getBlock() == Blocks.BEDROCK) {
@@ -80,7 +81,7 @@ public class PlayerUtils {
         BlockPos[] arrayOfBlockPos1;
         int i;
         byte b;
-        for (arrayOfBlockPos1 = touchingBlocks = new BlockPos[] { blockPos.north(), blockPos.south(), blockPos.east(), blockPos.west(), blockPos.down() }, i = arrayOfBlockPos1.length, b = 0; b < i; ) {
+        for (arrayOfBlockPos1 = touchingBlocks = new BlockPos[] { blockPos.north(), blockPos.south(), blockPos.east(), blockPos.west() }, i = arrayOfBlockPos1.length, b = 0; b < i; ) {
             BlockPos pos = arrayOfBlockPos1[b];
             IBlockState touchingState = mc.world.getBlockState(pos);
             if (touchingState.getBlock() != Blocks.AIR && (touchingState.getBlock() == Blocks.BEDROCK || touchingState.getBlock() == Blocks.OBSIDIAN)) {
@@ -94,5 +95,12 @@ public class PlayerUtils {
 
     public static boolean isInLiquid() {
         return mc.player.isInWater() || mc.player.isInLava();
+    }
+
+    public static void teleportPlayerToCenter() {
+        double centerX = Math.floor(mc.player.posX) + 0.5;
+        double centerZ = Math.floor(mc.player.posZ) + 0.5;
+        mc.player.setPosition(centerX, mc.player.posY, centerZ);
+        mc.player.connection.sendPacket(new CPacketPlayer.Position(centerX, mc.player.posY, centerZ, mc.player.onGround));
     }
 }

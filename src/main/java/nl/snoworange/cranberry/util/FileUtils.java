@@ -3,6 +3,7 @@ package nl.snoworange.cranberry.util;
 import com.google.gson.*;
 import nl.snoworange.cranberry.Main;
 import nl.snoworange.cranberry.features.module.Module;
+import nl.snoworange.cranberry.features.module.modules.misc.Announcer;
 import nl.snoworange.cranberry.features.setting.Bind;
 import nl.snoworange.cranberry.features.setting.Setting;
 

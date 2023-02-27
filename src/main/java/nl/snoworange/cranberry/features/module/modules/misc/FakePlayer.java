@@ -31,7 +31,7 @@ public class FakePlayer extends Module {
     public int randomID = -420;
     public EntityOtherPlayerMP fakeplayer;
 
-    //TODO: fix damage
+    //TODO: make damageable
     public FakePlayer() {
         super("FakePlayer",
                 "summons a fake client-side player",

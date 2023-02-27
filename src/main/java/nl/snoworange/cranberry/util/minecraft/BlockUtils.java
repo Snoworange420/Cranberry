@@ -213,4 +213,32 @@ public class BlockUtils {
 
         return false;
     }
+
+    public static void placeBlock(BlockPos pos, boolean rotate, boolean swing) {
+
+        if (mc.player == null || mc.world == null) return;
+
+        EnumFacing side = BlockUtils.getPlaceableSide(pos);
+
+        if (side == null) {
+            return;
+        }
+
+        BlockPos neighbour = pos.offset(side);
+        EnumFacing opposite = side.getOpposite();
+
+        Vec3d hitVec = new Vec3d(neighbour).add((new Vec3d(0.5, 0.5, 0.5)).add(new Vec3d(opposite.getDirectionVec()).scale(0.5)));
+        Block neighbourBlock = mc.world.getBlockState(neighbour).getBlock();
+
+        if (BlockUtils.blackList.contains(neighbourBlock) || BlockUtils.shulkerList.contains(neighbourBlock)) {
+            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING));
+        }
+
+        if (rotate) BlockUtils.sendRotatingPacket(hitVec);
+
+        mc.playerController.processRightClickBlock(mc.player, mc.world, neighbour, opposite, hitVec, EnumHand.MAIN_HAND);
+        mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
+
+        if (swing) mc.player.swingArm(EnumHand.MAIN_HAND);
+    }
 }

@@ -21,7 +21,7 @@ public class ArrayList extends Module {
         super("ArrayList", Category.HUD);
     }
 
-    public final Setting<Integer> x = register(new Setting<>("X", 5, 0, 1920));
+    public final Setting<Integer> x = register(new Setting<>("X", 2, 0, 1920));
     public final Setting<Integer> y = register(new Setting<>("Y", 150, 0, 1920));
     public final Setting<Integer> h = register(new Setting<>("Hue", 340, 0, 360));
     public final Setting<Integer> s = register(new Setting<>("Saturation", 241, 0, 360));

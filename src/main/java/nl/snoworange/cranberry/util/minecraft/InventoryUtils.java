@@ -7,6 +7,7 @@ import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.util.NonNullList;
 
 import java.util.List;
@@ -155,5 +156,11 @@ public class InventoryUtils {
         mc.playerController.windowClick(mc.player.inventoryContainer.windowId, from, 0, ClickType.PICKUP, mc.player);
         mc.playerController.windowClick(mc.player.inventoryContainer.windowId, to, 0, ClickType.PICKUP, mc.player);
         mc.playerController.windowClick(mc.player.inventoryContainer.windowId, from, 0, ClickType.PICKUP, mc.player);
+    }
+
+    public static void update(int index, boolean silent) {
+        mc.player.connection.sendPacket(new CPacketHeldItemChange(index));
+        if (!silent) mc.player.inventory.currentItem = index;
+        mc.playerController.updateController();
     }
 }

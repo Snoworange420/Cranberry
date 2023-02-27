@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayer;
@@ -34,15 +35,20 @@ public class PistonElevator extends Module {
     public BlockPos holePos;
     public BlockPos redstonePos;
     public EnumFacing pistonDirection;
-    public int tickTimer = 0;
+    public int redstoneTimer = 0;
+    public int holeTimer = 0;
     public boolean placedPiston = false;
+    public boolean placedRedstone = false;
+    public int originalSlot = -1;
 
 
     public final Setting<Boolean> targetFriends = register(new Setting<>("TargetFriends", false));
     public final Setting<Boolean> rotate = register(new Setting<>("Rotate", true));
     public final Setting<Boolean> swingArm = register(new Setting<>("SwingArm", true));
-    public final Setting<Boolean> silent = register(new Setting<>("Silent", false));
-    public final Setting<Integer> placeDelayTicks = register(new Setting<>("PlaceDelayTicks", 5, 0, 20));
+    public final Setting<Boolean> silent = register(new Setting<>("Silent", true));
+    public final Setting<Boolean> fillHole = register(new Setting<>("FillHole", true));
+    public final Setting<Integer> redstoneDelayTicks = register(new Setting<>("RedstoneDelayTicks", 3, 0, 20));
+    public final Setting<Integer> fillDelayTicks = register(new Setting<>("FillDelayTicks", 5, 0, 20));
     public final Setting<Boolean> autoDisable = register(new Setting<>("AutoDisable", true));
     public final Setting<Double> maxRange = register(new Setting<>("MaxTargetRange", 5.5, 0.1, 7.0));
     public final Setting<Double> maxPlaceRange = register(new Setting<>("MaxPlaceRange", 6.0, 0.1, 7.0));
@@ -57,15 +63,29 @@ public class PistonElevator extends Module {
     @Override
     public void onDisable() {
         super.onDisable();
+
+        if (!n() && originalSlot != -1) update(originalSlot, false);
+    }
+
+    @Override
+    public void init() {
+        this.setModuleStack(new ItemStack(Item.getItemFromBlock(Blocks.PISTON)));
     }
 
     public void reset() {
         phase = 0;
+
         basePos = null;
         holePos = null;
         redstonePos = null;
-        tickTimer = 0;
+
+        redstoneTimer = 0;
+        holeTimer = 0;
+
         placedPiston = false;
+        placedRedstone = false;
+
+        if (!n()) originalSlot = mc.player.inventory.currentItem;
     }
 
     @Override
@@ -73,15 +93,16 @@ public class PistonElevator extends Module {
 
         if (n()) return;
 
-        if (placedPiston) tickTimer++;
+        if (placedPiston) redstoneTimer++;
+        if (placedRedstone) holeTimer++;
 
         int pistonIndex = InventoryUtils.findHotbarPiston();
         int redstoneIndex = InventoryUtils.findHotbarItem(Item.getItemFromBlock(Blocks.REDSTONE_BLOCK));
 
         if (phase == 0 && (pistonIndex == -1 || redstoneIndex == -1)) {
 
-            if (pistonIndex == -1) ChatUtils.sendMessage("Missing piston in your hotbar!");
-            if (redstoneIndex == -1) ChatUtils.sendMessage("Missing redstone block in your hotbar!");
+            if (pistonIndex == -1) error("Missing piston in your hotbar!");
+            if (redstoneIndex == -1) error("Missing redstone block in your hotbar!");
 
             disable();
             return;
@@ -136,15 +157,36 @@ public class PistonElevator extends Module {
 
             if (redstonePos == null) return;
 
-            if (tickTimer >= placeDelayTicks.getValue()) {
+            if (redstoneTimer >= redstoneDelayTicks.getValue()) {
                 update(redstoneIndex, silent.getValue());
                 placeBlock(redstonePos);
 
-                mc.player.connection.sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem));
+                placedRedstone = true;
+
+                if (!fillHole.getValue()) {
+                    if (autoDisable.getValue()) {
+                        disable();
+                        phase = -1;
+                    } else {
+                        reset();
+                    }
+                } else {
+                    phase = 3;
+                }
+            }
+        }
+
+        if (phase == 3) {
+
+            if (holePos == null) return;
+
+            if (holeTimer >= fillDelayTicks.getValue()) {
+                update(pistonIndex, silent.getValue());
+                placeBlock(holePos);
 
                 if (autoDisable.getValue()) {
                     disable();
-                    phase = 3;
+                    phase = -1;
                 } else {
                     reset();
                 }
@@ -190,7 +232,7 @@ public class PistonElevator extends Module {
 
                     phase = 1;
 
-                    holePos = blockPos.offset(facing).down();
+                    holePos = new BlockPos(new Vec3d(target.posX, target.posY, target.posZ));
 
                     for (EnumFacing redstoneFacing : EnumFacing.VALUES) {
                         if (BlockUtils.isEmptyBlock(basePos.offset(redstoneFacing), true)
