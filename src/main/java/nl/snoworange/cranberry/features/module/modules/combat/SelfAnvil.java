@@ -12,8 +12,6 @@ import nl.snoworange.cranberry.util.minecraft.BlockUtils;
 import nl.snoworange.cranberry.util.minecraft.InventoryUtils;
 import nl.snoworange.cranberry.util.minecraft.PlayerUtils;
 
-//what a piece of shit - CinnamonApple
-
 public class SelfAnvil extends Module {
 
     public SelfAnvil() {
@@ -87,7 +85,10 @@ public class SelfAnvil extends Module {
 
             if (selfAnvil.getValue()) {
 
-                if (anvilPos == null) searchAnvilPos();
+                if (anvilPos == null) {
+                    searchAnvilPos();
+                    return;
+                }
 
                 InventoryUtils.update(anvilIndex, silent.getValue());
                 BlockUtils.placeBlock(anvilPos, rotate.getValue(), swing.getValue());

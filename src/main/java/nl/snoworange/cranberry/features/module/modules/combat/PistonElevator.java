@@ -18,7 +18,6 @@ import nl.snoworange.cranberry.features.module.Category;
 import nl.snoworange.cranberry.features.module.Module;
 import nl.snoworange.cranberry.features.setting.Setting;
 import nl.snoworange.cranberry.util.minecraft.BlockUtils;
-import nl.snoworange.cranberry.util.minecraft.ChatUtils;
 import nl.snoworange.cranberry.util.minecraft.InventoryUtils;
 import nl.snoworange.cranberry.util.minecraft.PlayerUtils;
 
@@ -48,7 +47,7 @@ public class PistonElevator extends Module {
     public final Setting<Boolean> silent = register(new Setting<>("Silent", true));
     public final Setting<Boolean> fillHole = register(new Setting<>("FillHole", true));
     public final Setting<Integer> redstoneDelayTicks = register(new Setting<>("RedstoneDelayTicks", 3, 0, 20));
-    public final Setting<Integer> fillDelayTicks = register(new Setting<>("FillDelayTicks", 5, 0, 20));
+    public final Setting<Integer> fillDelayTicks = register(new Setting<>("FillDelayTicks", 3, 0, 20));
     public final Setting<Boolean> autoDisable = register(new Setting<>("AutoDisable", true));
     public final Setting<Double> maxRange = register(new Setting<>("MaxTargetRange", 5.5, 0.1, 7.0));
     public final Setting<Double> maxPlaceRange = register(new Setting<>("MaxPlaceRange", 6.0, 0.1, 7.0));
@@ -225,7 +224,8 @@ public class PistonElevator extends Module {
                         && box.intersects(target.getEntityBoundingBox())
                         && target.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= 2
                         && BlockUtils.isEmptyBlock(blockPos.offset(facing), false)
-                        && EnumFacing.getDirectionFromEntityLiving(blockPos, mc.player).equals(facing)
+                        && !(EnumFacing.getDirectionFromEntityLiving(blockPos, mc.player).equals(EnumFacing.DOWN) ||
+                        EnumFacing.getDirectionFromEntityLiving(blockPos, mc.player).equals(EnumFacing.UP))
                 ) {
                     basePos = blockPos;
                     pistonDirection = facing.getOpposite();

@@ -10,7 +10,7 @@ public class Announcer extends Module {
 
     public Announcer() {
         super("Announcer",
-                "Announces client events, e.g. module updates",
+                "Announces client-side events, e.g. module updates",
                 Category.MISC
         );
 

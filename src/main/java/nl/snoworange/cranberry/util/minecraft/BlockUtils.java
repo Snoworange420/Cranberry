@@ -145,7 +145,13 @@ public class BlockUtils {
 
     public static EnumFacing getPlaceableSide(BlockPos pos) {
 
+        if (pos == null) return null;
+
         for (EnumFacing side : EnumFacing.values()) {
+
+            if (side == null) {
+                return null;
+            }
 
             BlockPos neighbour = pos.offset(side);
 

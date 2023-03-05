@@ -33,6 +33,8 @@ public class Auto32k extends Module {
     public EnumFacing dispenserDirection;
     public boolean placeVertically;
     public int originalSlot = -1;
+    public int lastAirIndex = -1;
+    public int tickTimer = 0;
 
     Timer timer = new Timer();
 
@@ -41,16 +43,23 @@ public class Auto32k extends Module {
     public final Setting<Boolean> rotate = register(new Setting<>("Rotate", true));
     public final Setting<Boolean> swingArm = register(new Setting<>("SwingArm", true));
     public final Setting<Boolean> autoClose = register(new Setting<>("AutoClose", true));
+    public final Setting<SearchMode> searchMode = register(new Setting<>("SearchMode", SearchMode.FROMDOWN));
     public final Setting<Boolean> timeout = register(new Setting<>("Timeout", true));
     public final Setting<Long> timeoutMs = register(new Setting<>("TimeoutMillis", 1250L, 49L, 3200L));
-    public final Setting<Double> horizontalRange = register(new Setting<>("HorizontalRange", 6.0, 1.0, 7.0));
-    public final Setting<Double> plusVerticalRange = register(new Setting<>("+VerticalRange", 6.0, -7.0, 7.0));
-    public final Setting<Double> minusVerticalRange = register(new Setting<>("-VerticalRange", 6.0, -7.0, 7.0));
-    public final Setting<Double> maxPlaceRange = register(new Setting<>("MaxPlaceRange", 5.5, 1.0, 7.0));
+    public final Setting<Boolean> blockShulker = register(new Setting<>("BlockShulker", true));
+    public final Setting<Integer> horizontalRange = register(new Setting<>("HorizontalRange", 6, 1, 7));
+    public final Setting<Integer> plusVerticalRange = register(new Setting<>("+VerticalRange", 6, -7, 7));
+    public final Setting<Integer> minusVerticalRange = register(new Setting<>("-VerticalRange", 6, -7, 7));
+    public final Setting<Double> maxPlaceRange = register(new Setting<>("MaxPlaceRange", 6.0, 1.0, 7.0));
     public final Setting<Double> maxHopperRange = register(new Setting<>("MaxHopperRange", 5.0, 1.0, 7.0));
     public final Setting<Boolean> selectSwordSlot = register(new Setting<>("Select32kSlot", true));
     public final Setting<Boolean> checkFor32kShulks = register(new Setting<>("Force32kShulker", true));
     public final Setting<Boolean> debug = register(new Setting<>("Debug", false));
+
+    public enum SearchMode {
+        FROMUP,
+        FROMDOWN;
+    }
 
     public Auto32k() {
         super("Auto32k",
@@ -63,7 +72,11 @@ public class Auto32k extends Module {
     public void onEnable() {
         super.onEnable();
 
+        tickTimer = 0;
+
         phase = 0;
+        lastAirIndex = -1;
+
         basePos = null;
         redstonePos = null;
         tempBasePos = null;
@@ -93,6 +106,8 @@ public class Auto32k extends Module {
     public void onFastTick() {
 
         if (n()) return;
+
+        tickTimer++;
 
         if (timer.passedMs(timeoutMs.getValue()) && timeout.getValue()) disable();
 
@@ -131,33 +146,22 @@ public class Auto32k extends Module {
 
         if (phase == 0) {
 
-            //Normal placement
             if (basePos == null) {
-
+                placeVertically = false;
                 searchBestPlacement();
 
-                //search if we can place vertically when after searching for invalid placement
                 if (basePos == null) {
-                    searchBestPlacementVertically();
-
-                    //if even thats not possible place block and continue
-                    if (basePos == null) {
-
-                        //place block so we can place (?)
-                        update(dispenserIndex, silent.getValue());
-                        placeBlock(tempBasePos);
-
-                        searchBestPlacement();
-                    }
+                    placeVertically = true;
+                    searchBestPlacement();
                 }
             }
         }
 
         if (phase == 1) {
 
-            if (debug.getValue()) info("Start placing " + (placeVertically ? "vertically" : "normal") + " 32k @ " + basePos.getX() + " " + basePos.getY() + " " + basePos.getZ() + " facing " + dispenserDirection.getOpposite().getName());
-
             mc.player.setSprinting(false);
+
+            if (debug.getValue()) info("Start placing 32k " + (placeVertically ? "vertically" : "normally") + " facing " + dispenserDirection.getOpposite().getName());
 
             float yaw;
 
@@ -223,12 +227,9 @@ public class Auto32k extends Module {
                     && mc.player.openContainer.inventorySlots != null) {
 
                 //swap shulker box
-                if (mc.player.openContainer.inventorySlots.get(0).getStack().isEmpty()) {
-                    //mousebutton 0, important!11!!
-                    mc.playerController.windowClick(mc.player.openContainer.windowId, shulkerIndex, 0, ClickType.QUICK_MOVE, mc.player);
+                mc.playerController.windowClick(mc.player.openContainer.windowId, shulkerIndex, 0, ClickType.QUICK_MOVE, mc.player);
 
-                    if (debug.getValue()) info("Swapped shulker box @ slot " + shulkerIndex + " into dispenser");
-                }
+                if (debug.getValue()) info("Swapped shulker @ slot " + shulkerIndex);
 
                 if (skipShulkerCheck.getValue()) {
 
@@ -298,7 +299,6 @@ public class Auto32k extends Module {
         }
 
         if (phase == 5) {
-
             //swap 32k
             if (overenchantedSwordIndex == -1
                     && mc.player.openContainer != null
@@ -327,21 +327,61 @@ public class Auto32k extends Module {
                         mc.player
                 );
 
-                if (selectSwordSlot.getValue()) update((airIndex != -1 ? airIndex : (revertedSwordIndex != -1 ? revertedSwordIndex : mc.player.inventory.currentItem)), false);
+                lastAirIndex = airIndex;
+
+                if (selectSwordSlot.getValue() && (!blockShulker.getValue() || placeVertically)) update((airIndex != -1 ? airIndex : (revertedSwordIndex != -1 ? revertedSwordIndex : mc.player.inventory.currentItem)), false);
 
                 if (debug.getValue()) info("32k found in slot " + overenchantedSwordIndex);
 
                 if (autoClose.getValue() && mc.currentScreen instanceof GuiHopper) mc.player.closeScreen();
 
-                if (debug.getValue()) info("Process ended in " + timer.getPassedTimeMs() + " ms");
+                if (debug.getValue() && !blockShulker.getValue()) info("Process ended in " + timer.getPassedTimeMs() + " ms / " + tickTimer + "tx");
 
-                disable();
+                if (!blockShulker.getValue() || placeVertically) disable();
 
                 phase = 6;
             }
         }
 
         if (phase == 6) {
+            if (!blockShulker.getValue() || placeVertically) {
+                phase = 7;
+                return;
+            } else {
+
+                if (BlockUtils.isEmptyBlock(basePos.offset(dispenserDirection.getOpposite()).up(2), true)
+                        && BlockUtils.checkIfBlockIsPlaceable(basePos.offset(dispenserDirection.getOpposite()).up(2))) {
+
+                    if (dispenserIndex == -1 && redstoneIndex == -1) {
+
+                        phase = 7;
+
+                        error("No valid blocks to block shulker found!");
+                        return;
+                    }
+
+                    update(dispenserIndex != -1 ? dispenserIndex : redstoneIndex, silent.getValue());
+                    placeBlock(basePos.offset(dispenserDirection.getOpposite()).up(2));
+                    update(mc.player.inventory.currentItem, false);
+
+                }
+
+                phase = 7;
+            }
+        }
+
+        if (phase == 7) {
+
+            if (selectSwordSlot.getValue()) update((lastAirIndex != -1 ? lastAirIndex : (revertedSwordIndex != -1 ? revertedSwordIndex : mc.player.inventory.currentItem)), false);
+
+            if (debug.getValue()) info("Process ended in " + timer.getPassedTimeMs() + " ms / " + tickTimer + "tx");
+
+            phase = 8;
+
+            disable();
+        }
+
+        if (phase == 8) {
             if (HopperRadius.getInstance().sync32kHopper.getValue() && basePos != null) {
                 HopperRadius.getInstance().hopperPos = placeVertically ? basePos.down(2) : basePos.offset(dispenserDirection.getOpposite());
             }
@@ -349,47 +389,20 @@ public class Auto32k extends Module {
     }
 
     public void searchBestPlacement() {
-
-        BlockPos closestBlockPos = null;
-
-        placeVertically = false;
-
         for (EnumFacing direction : EnumFacing.HORIZONTALS) {
-            for (BlockPos blockPos : BlockPos.getAllInBox(new BlockPos(mc.player.posX - horizontalRange.getValue(), mc.player.posY - minusVerticalRange.getValue(), mc.player.posZ - horizontalRange.getValue()), new BlockPos(mc.player.posX + horizontalRange.getValue(), mc.player.posY + plusVerticalRange.getValue(), mc.player.posZ + horizontalRange.getValue()))) {
-                if (basePos == null) {
-
-                    tempBasePos = blockPos;
-
-                    if (mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= maxPlaceRange.getValue()
-                            && BlockUtils.checkIfBlockIsPlaceable(blockPos.up())
-                            && EnumFacing.getDirectionFromEntityLiving(blockPos.up(), mc.player).equals(direction)
-                            && BlockUtils.checkIfBlockIsPlaceable(blockPos.offset(direction))
-                            && mc.player.getDistance(blockPos.offset(direction).getX(), blockPos.offset(direction).getY(), blockPos.offset(direction).getZ()) <= maxHopperRange.getValue()
-                            && BlockUtils.hasEmptyBlockIn4Directions(blockPos.up())
-                            && BlockUtils.isEmptyBlock(blockPos.offset(direction), true)
-                            && BlockUtils.isEmptyBlock(blockPos.offset(direction).up(), true)
-                            && !(BlockUtils.exsistsBlocksNearby(blockPos.offset(direction), Blocks.REDSTONE_BLOCK))
-                    ) {
-                        closestBlockPos = blockPos;
+            if (searchMode.getValue().equals(SearchMode.FROMDOWN)) {
+                for (int y = -minusVerticalRange.getValue(); y < plusVerticalRange.getValue(); ++y) {
+                    for (int x = -horizontalRange.getValue(); x < horizontalRange.getValue(); ++x) {
+                        for (int z = -horizontalRange.getValue(); z < horizontalRange.getValue(); ++z) {
+                            if (basePos == null) start32k(new BlockPos(new Vec3d(mc.player.posX + x, mc.player.posY + y, mc.player.posZ + z)), direction);
+                        }
                     }
-
-                    //continue
-                    if (closestBlockPos != null) {
-
-                        basePos = closestBlockPos;
-                        dispenserDirection = direction.getOpposite();
-
-                        phase = 1;
-
-                        //redstone
-                        for (EnumFacing redstoneFacing : EnumFacing.values()) {
-                            if (!(redstoneFacing.equals(EnumFacing.DOWN)
-                                    || blockPos.up().offset(redstoneFacing).equals(blockPos.up().offset(direction)))) {
-                                if (BlockUtils.isEmptyBlock(blockPos.up().offset(redstoneFacing), true)) {
-                                    redstonePos = blockPos.up().offset(redstoneFacing);
-                                    break;
-                                }
-                            }
+                }
+            } else if (searchMode.getValue().equals(SearchMode.FROMUP)) {
+                for (int y = plusVerticalRange.getValue(); y > -minusVerticalRange.getValue(); --y) {
+                    for (int x = -horizontalRange.getValue(); x < horizontalRange.getValue(); ++x) {
+                        for (int z = -horizontalRange.getValue(); z < horizontalRange.getValue(); ++z) {
+                            if (basePos == null) start32k(new BlockPos(new Vec3d(mc.player.posX + x, mc.player.posY + y, mc.player.posZ + z)), direction);
                         }
                     }
                 }
@@ -397,44 +410,55 @@ public class Auto32k extends Module {
         }
     }
 
-    public void searchBestPlacementVertically() {
+    public void start32k(BlockPos blockPos, EnumFacing direction) {
+        if (placeVertically) {
+            if (mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= maxPlaceRange.getValue()
+                    && BlockUtils.isEmptyBlock(blockPos, true)
+                    && BlockUtils.isEmptyBlock(blockPos.down(), true)
+                    && BlockUtils.isEmptyBlock(blockPos.down(2), true)
+                    && mc.player.getDistance(blockPos.down(2).getX(), blockPos.down(2).getY(), blockPos.down(2).getX()) <= maxHopperRange.getValue()
+                    && EnumFacing.getDirectionFromEntityLiving(blockPos, mc.player).equals(EnumFacing.DOWN)
+                    && BlockUtils.checkIfBlockIsPlaceable(blockPos)
+                    && (BlockUtils.checkIfBlockIsPlaceable(blockPos.down(2)) || mc.world.getBlockState(blockPos.down(3)).getMaterial().isSolid())
+                    && !(BlockUtils.exsistsBlocksNearby(blockPos.down(2), Blocks.REDSTONE_BLOCK))
+            ) {
+                basePos = blockPos;
+                dispenserDirection = EnumFacing.UP; //does nothing because down bruh
 
-        BlockPos closestBlockPos = null;
+                phase = 1;
 
-        placeVertically = true;
+                for (EnumFacing tempRedstoneFacing : EnumFacing.values()) {
 
-        for (BlockPos blockPos : BlockPos.getAllInBox(new BlockPos(mc.player.posX - horizontalRange.getValue(), mc.player.posY - minusVerticalRange.getValue(), mc.player.posZ - horizontalRange.getValue()), new BlockPos(mc.player.posX + horizontalRange.getValue(), mc.player.posY + plusVerticalRange.getValue(), mc.player.posZ + horizontalRange.getValue()))) {
-            if (basePos == null) {
+                    if (tempRedstoneFacing.equals(EnumFacing.DOWN)) continue;
 
-                if (mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= maxPlaceRange.getValue()
-                        && BlockUtils.isEmptyBlock(blockPos, true)
-                        && BlockUtils.isEmptyBlock(blockPos.down(), true)
-                        && BlockUtils.isEmptyBlock(blockPos.down(2), true)
-                        && mc.player.getDistance(blockPos.down(2).getX(), blockPos.down(2).getY(), blockPos.down(2).getX()) <= maxHopperRange.getValue()
-                        && EnumFacing.getDirectionFromEntityLiving(blockPos, mc.player).equals(EnumFacing.DOWN)
-                        && BlockUtils.checkIfBlockIsPlaceable(blockPos)
-                        && (BlockUtils.checkIfBlockIsPlaceable(blockPos.down(2)) || mc.world.getBlockState(blockPos.down(3)).getMaterial().isSolid())
-                        && !(BlockUtils.exsistsBlocksNearby(blockPos.down(2), Blocks.REDSTONE_BLOCK))
-                ) {
-                    closestBlockPos = blockPos;
+                    if (BlockUtils.isEmptyBlock(blockPos.offset(tempRedstoneFacing), true)) {
+                        redstonePos = blockPos.offset(tempRedstoneFacing);
+                        break;
+                    }
                 }
+            }
+        } else {
+            if (mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= maxPlaceRange.getValue()
+                    && !(EnumFacing.getDirectionFromEntityLiving(blockPos.up(), mc.player).equals(EnumFacing.UP)
+                    || EnumFacing.getDirectionFromEntityLiving(blockPos.up(), mc.player).equals(EnumFacing.DOWN))
+                    && BlockUtils.checkIfBlockIsPlaceable(blockPos.up())
+                    && BlockUtils.checkIfBlockIsPlaceable(blockPos.offset(direction))
+                    && mc.player.getDistance(blockPos.offset(direction).getX(), blockPos.offset(direction).getY(), blockPos.offset(direction).getZ()) <= maxHopperRange.getValue()
+                    && BlockUtils.hasEmptyBlockIn4Directions(blockPos.up())
+                    && BlockUtils.isEmptyBlock(blockPos.offset(direction), true)
+                    && BlockUtils.isEmptyBlock(blockPos.offset(direction).up(), true)
+                    && !(BlockUtils.exsistsBlocksNearby(blockPos.offset(direction), Blocks.REDSTONE_BLOCK))
+            ) {
+                basePos = blockPos;
+                dispenserDirection = direction.getOpposite();
 
-                //continue
-                if (closestBlockPos != null) {
+                phase = 1;
 
-                    basePos = closestBlockPos;
-
-                    phase = 1;
-
-                    dispenserDirection = EnumFacing.UP; //does nothing because down bruh
-
-                    //redstone
-                    for (EnumFacing tempRedstoneFacing : EnumFacing.values()) {
-
-                        if (tempRedstoneFacing.equals(EnumFacing.DOWN)) continue;
-
-                        if (BlockUtils.isEmptyBlock(blockPos.offset(tempRedstoneFacing), true)) {
-                            redstonePos = blockPos.offset(tempRedstoneFacing);
+                for (EnumFacing redstoneFacing : EnumFacing.values()) {
+                    if (!(redstoneFacing.equals(EnumFacing.DOWN)
+                            || blockPos.up().offset(redstoneFacing).equals(blockPos.up().offset(direction)))) {
+                        if (BlockUtils.isEmptyBlock(blockPos.up().offset(redstoneFacing), true)) {
+                            redstonePos = blockPos.up().offset(redstoneFacing);
                             break;
                         }
                     }
