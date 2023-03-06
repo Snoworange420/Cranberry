@@ -108,6 +108,16 @@ public class InventoryUtils {
         return -1;
     }
 
+    public static int findHotbarShulker() {
+        for (int i = 0; i < 9; ++i) {
+            Item slot = mc.player.inventory.getStackInSlot(i).getItem();
+            if (slot instanceof ItemShulkerBox) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public static int findHotbarPiston() {
         for (int i = 0; i < 9; ++i) {
 
@@ -130,6 +140,23 @@ public class InventoryUtils {
                 for (ItemStack content : items) {
                     if (is32k(content)) {
                         return i < 9 ? i + 36 : i;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+
+    public static int findHotbarShulkerWith32ksInside() {
+        for (int i = 0; i < 9; ++i) {
+            ItemStack itemStack = mc.player.inventory.getStackInSlot(i);
+            if (itemStack.getItem() instanceof ItemShulkerBox) {
+
+                List<ItemStack> items = getShulkerContents(itemStack);
+
+                for (ItemStack content : items) {
+                    if (is32k(content)) {
+                        return i;
                     }
                 }
             }

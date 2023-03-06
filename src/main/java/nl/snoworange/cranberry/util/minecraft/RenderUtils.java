@@ -21,6 +21,8 @@ public class RenderUtils {
 
     public static void drawCircle(BlockPos blockPos, double radius, double height, Color color) {
 
+        if (blockPos == null) return;
+
         GlStateManager.pushMatrix();
         GlStateManager.enableBlend();
         GlStateManager.disableDepth();
