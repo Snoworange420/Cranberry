@@ -24,7 +24,7 @@ Advanced utility 1.12.2 forge mod, aimed at use in anarchy environments.
 ## Installation
 1. Install Minecraft 1.12.2
 2. Install the latest Forge for 1.12.2 [(download)](https://files.minecraftforge.net/net/minecraftforge/forge/index_1.12.2.html)
-3. Get the latest Cranberry version here [(download)](https://github.com/Snoworange420/Cranberry/releases/download/v0.7.1/Cranberry-v0.7.1.jar)
+3. Get the latest Cranberry version here [(download)](https://github.com/Snoworange420/Cranberry/releases/download/v0.7.3/Cranberry-v0.7.3.jar)
 4. Put the file in your `.minecraft/mods` folder
 
 ## FAQ (not even frequent asked)
