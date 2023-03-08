@@ -67,7 +67,7 @@ public class Aura32k extends Module {
                 currentTarget = target;
 
                 mc.player.connection.sendPacket(new CPacketHeldItemChange(stronkswordslot));
-                mc.playerController.attackEntity(mc.player, target);
+                mc.player.connection.sendPacket(new CPacketUseEntity(target));
                 mc.player.connection.sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem));
                 if (swing.getValue()) mc.player.swingArm(EnumHand.MAIN_HAND);
             } else {

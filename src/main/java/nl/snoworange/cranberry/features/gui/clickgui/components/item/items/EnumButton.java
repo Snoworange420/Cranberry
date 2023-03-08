@@ -19,7 +19,7 @@ public class EnumButton extends Button {
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        Gui.drawRect((int) this.x, (int) this.y, (int) (this.x + (float) this.width + 7.4f), (int) (this.y + (float) this.height - 0.5f), new Color(155, 23, 42).getRGB());
+        Gui.drawRect((int) this.x, (int) this.y, (int) (this.x + (float) this.width + 7.4f), (int) (this.y + (float) this.height - 0.5f), new Color(166, 13, 61).getRGB());
         mc.fontRenderer.drawStringWithShadow(this.setting.getName() + " " + ChatFormatting.GRAY + (this.setting.currentEnumName().equalsIgnoreCase("ABC") ? "ABC" : this.setting.currentEnumName()), this.x + 2.3f, this.y - 1.7f - (float) -6, this.getState() ? -1 : -5592406);
     }
 

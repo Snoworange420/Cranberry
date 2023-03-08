@@ -47,7 +47,7 @@ public class Auto32k extends Module {
     public final Setting<Boolean> rotate = register(new Setting<>("Rotate", true));
     public final Setting<Boolean> swingArm = register(new Setting<>("SwingArm", true));
     public final Setting<Boolean> autoClose = register(new Setting<>("AutoClose", true));
-    public final Setting<SearchMode> searchMode = register(new Setting<>("SearchMode", SearchMode.FROMDOWN));
+    public final Setting<SearchMode> searchMode = register(new Setting<>("SearchMode", SearchMode.FROMUP));
     public final Setting<Boolean> timeout = register(new Setting<>("Timeout", true));
     public final Setting<Long> timeoutMs = register(new Setting<>("TimeoutMillis", 1250L, 49L, 3200L));
     public final Setting<Boolean> blockShulker = register(new Setting<>("BlockShulker", true));
@@ -100,6 +100,12 @@ public class Auto32k extends Module {
         if (!n()) originalSlot = mc.player.inventory.currentItem;
 
         timer.reset();
+
+        if (useDispenser) {
+            this.setModuleStack(new ItemStack(Blocks.DISPENSER));
+        } else {
+            this.setModuleStack(new ItemStack(Blocks.HOPPER));
+        }
     }
 
     @Override
@@ -112,6 +118,7 @@ public class Auto32k extends Module {
             }
 
             if (originalSlot != -1 && !selectSwordSlot.getValue()) update(originalSlot, false);
+            update(mc.player.inventory.currentItem, false);
 
             mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
         }
@@ -131,7 +138,7 @@ public class Auto32k extends Module {
         int hopperIndex = InventoryUtils.findHotbarItem(Item.getItemFromBlock(Blocks.HOPPER));
         int redstoneIndex = InventoryUtils.findHotbarItem(Item.getItemFromBlock(Blocks.REDSTONE_BLOCK));
         int dispenserIndex = InventoryUtils.findHotbarItem(Item.getItemFromBlock(Blocks.DISPENSER));
-        int shulkerIndex = useDispenser ?
+        int shulkerIndex = useDispenser ? 
                 (checkFor32kShulks.getValue() ? InventoryUtils.findShulkerWith32ksInside() : InventoryUtils.findShulker())
                 : (checkFor32kShulks.getValue() ? InventoryUtils.findHotbarShulkerWith32ksInside() : InventoryUtils.findHotbarShulker());
         int overenchantedSwordIndex = InventoryUtils.findHotbar32k();
@@ -496,7 +503,7 @@ public class Auto32k extends Module {
                 for (int y = -minusVerticalRange.getValue(); y < plusVerticalRange.getValue(); ++y) {
                     for (int x = -horizontalRange.getValue(); x < horizontalRange.getValue(); ++x) {
                         for (int z = -horizontalRange.getValue(); z < horizontalRange.getValue(); ++z) {
-                            if (basePos == null) {
+                            if (basePos == null && mc.player.posY + y >= 1) {
 
                                 if (useDispenser) {
                                     startDispenser32k(new BlockPos(new Vec3d(mc.player.posX + x, mc.player.posY + y, mc.player.posZ + z)), direction);
@@ -512,7 +519,7 @@ public class Auto32k extends Module {
                 for (int y = plusVerticalRange.getValue(); y > -minusVerticalRange.getValue(); --y) {
                     for (int x = -horizontalRange.getValue(); x < horizontalRange.getValue(); ++x) {
                         for (int z = -horizontalRange.getValue(); z < horizontalRange.getValue(); ++z) {
-                            if (basePos == null) {
+                            if (basePos == null && mc.player.posY + y >= 1) {
 
                                 if (useDispenser) {
                                     startDispenser32k(new BlockPos(new Vec3d(mc.player.posX + x, mc.player.posY + y, mc.player.posZ + z)), direction);
@@ -608,6 +615,8 @@ public class Auto32k extends Module {
     private void placeBlock(BlockPos pos) {
 
         if (n()) return;
+
+        if (pos.getY() <= 0) return;
 
         EnumFacing side = BlockUtils.getPlaceableSide(pos);
 

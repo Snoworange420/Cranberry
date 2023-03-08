@@ -16,6 +16,7 @@ import nl.snoworange.cranberry.Main;
 import nl.snoworange.cranberry.features.gui.clickgui.CranberryClickGUI;
 import nl.snoworange.cranberry.features.module.modules.combat.*;
 import nl.snoworange.cranberry.features.module.modules.exploit.SecretClose;
+import nl.snoworange.cranberry.features.module.modules.hud.Coordinates;
 import nl.snoworange.cranberry.features.module.modules.hud.Watermark;
 import nl.snoworange.cranberry.features.module.modules.misc.*;
 import nl.snoworange.cranberry.features.module.modules.movement.AutoSprint;
@@ -44,6 +45,7 @@ public class ModuleManager {
         modules.add(new PistonElevator());
         modules.add(new SelfAnvil());
         modules.add(new AutoAnvil());
+        modules.add(new EntityAura());
 
         modules.add(new SecretClose());
 
@@ -71,6 +73,7 @@ public class ModuleManager {
 
         modules.add(new nl.snoworange.cranberry.features.module.modules.hud.ArrayList());
         modules.add(new Watermark());
+        modules.add(new Coordinates());
     }
 
     //lambda expression go brr
