@@ -1,11 +1,19 @@
 package nl.snoworange.cranberry;
 
+import net.minecraft.advancements.*;
+import net.minecraft.client.multiplayer.ClientAdvancementManager;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.tutorial.Tutorial;
+import net.minecraft.client.tutorial.TutorialSteps;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.AdvancementEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import nl.snoworange.cranberry.features.command.CommandManager;
 import nl.snoworange.cranberry.features.friend.Friend;
 import nl.snoworange.cranberry.features.module.ModuleManager;
@@ -20,7 +28,7 @@ public class Main {
     //Refrences
     public static final String MOD_ID = "cranberry";
     public static final String NAME = "Cranberry";
-    public static final String VERSION = "v0.7.4";
+    public static final String VERSION = "v0.7.6";
     public static final String ACCEPTED_MINECRAFT_VERSIONS = "[1.12.2]";
     public static final Logger LOGGER = LogManager.getLogger("Cranberry");
 

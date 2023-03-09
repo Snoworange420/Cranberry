@@ -224,6 +224,7 @@ public class PistonElevator extends Module {
                         && box.intersects(target.getEntityBoundingBox())
                         && target.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= 2
                         && BlockUtils.isEmptyBlock(blockPos.offset(facing), false)
+                        && BlockUtils.isEmptyBlock(blockPos.offset(facing, 2), false)
                         && !(EnumFacing.getDirectionFromEntityLiving(blockPos, mc.player).equals(EnumFacing.DOWN) ||
                         EnumFacing.getDirectionFromEntityLiving(blockPos, mc.player).equals(EnumFacing.UP))
                 ) {

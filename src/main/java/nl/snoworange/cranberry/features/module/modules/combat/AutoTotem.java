@@ -5,8 +5,10 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import nl.snoworange.cranberry.Main;
 import nl.snoworange.cranberry.features.module.Category;
 import nl.snoworange.cranberry.features.module.Module;
+import nl.snoworange.cranberry.features.module.modules.exploit.SecretClose;
 import nl.snoworange.cranberry.features.setting.Setting;
 import nl.snoworange.cranberry.util.minecraft.InventoryUtils;
 
@@ -41,7 +43,7 @@ public class AutoTotem extends Module {
 
         if (n()) return;
 
-        if (mc.currentScreen instanceof GuiHopper) return;
+        if (mc.currentScreen instanceof GuiHopper || (Main.moduleManager.getModuleByName("SecretClose").isEnabled() && SecretClose.lastGui instanceof GuiHopper)) return;
 
         if (mc.player.getHeldItemOffhand().getItem() != Items.TOTEM_OF_UNDYING) {
             offhandTotemSlot = InventoryUtils.findInv(Items.TOTEM_OF_UNDYING);

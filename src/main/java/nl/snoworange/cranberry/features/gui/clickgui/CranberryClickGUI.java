@@ -65,6 +65,7 @@ public class CranberryClickGUI extends GuiScreen {
                         }
                     });
                 }
+
             });
         }
         this.components.forEach(components -> components.getItems().sort(Comparator.comparing(ComponentFeature::getName)));

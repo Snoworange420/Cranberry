@@ -15,6 +15,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import nl.snoworange.cranberry.features.module.Category;
 import nl.snoworange.cranberry.features.module.Module;
+import nl.snoworange.cranberry.features.module.modules.combat.HopperNuker;
 import nl.snoworange.cranberry.features.setting.Setting;
 import nl.snoworange.cranberry.util.minecraft.*;
 import nl.snoworange.cranberry.util.Timer;
@@ -37,6 +38,7 @@ public class Auto32k extends Module {
     public int lastAirIndex = -1;
     public int tickTimer = 0;
     public int hopperTimer = 0;
+    public static int lastHopperGuiID = 0;
     public boolean firstShulker = false;
 
     Timer timer = new Timer();
@@ -113,9 +115,6 @@ public class Auto32k extends Module {
         super.onDisable();
 
         if (!n()) {
-            if (phase < 7 && mc.currentScreen instanceof GuiDispenser) {
-                mc.player.closeScreen();
-            }
 
             if (originalSlot != -1 && !selectSwordSlot.getValue()) update(originalSlot, false);
             update(mc.player.inventory.currentItem, false);
@@ -369,6 +368,8 @@ public class Auto32k extends Module {
                     && !mc.player.openContainer.inventorySlots.isEmpty()
             ) {
 
+                lastHopperGuiID = mc.player.openContainer.windowId;
+
                 for (int i = 0; i < 5; i++) {
                     if (InventoryUtils.is32k(mc.player.openContainer.inventorySlots.get(0).inventory.getStackInSlot(i))) {
                         overenchantedSwordIndex = i;
@@ -391,11 +392,11 @@ public class Auto32k extends Module {
 
                 lastAirIndex = airIndex;
 
+                if (autoClose.getValue() && mc.currentScreen instanceof GuiHopper) mc.player.closeScreen();
+
                 if (selectSwordSlot.getValue() && (!blockShulker.getValue() || placeVertically)) update((airIndex != -1 ? airIndex : (revertedSwordIndex != -1 ? revertedSwordIndex : mc.player.inventory.currentItem)), false);
 
                 if (debug.getValue()) info("32k found in slot " + overenchantedSwordIndex);
-
-                if (autoClose.getValue() && mc.currentScreen instanceof GuiHopper) mc.player.closeScreen();
 
                 if (debug.getValue() && !blockShulker.getValue()) info("Process ended in " + timer.getPassedTimeMs() + " ms / " + tickTimer + "tx");
 
@@ -436,13 +437,13 @@ public class Auto32k extends Module {
 
         if (phase == 7) {
 
+            if (autoClose.getValue() && mc.currentScreen instanceof GuiHopper) mc.player.closeScreen();
+
             if (selectSwordSlot.getValue()) update((lastAirIndex != -1 ? lastAirIndex : (revertedSwordIndex != -1 ? revertedSwordIndex : mc.player.inventory.currentItem)), false);
 
             if (debug.getValue()) info("Process ended in " + timer.getPassedTimeMs() + " ms / " + tickTimer + "tx");
 
             phase = 8;
-
-            disable();
         }
 
         if (phase == 8) {
@@ -549,6 +550,8 @@ public class Auto32k extends Module {
                 basePos = blockPos;
                 dispenserDirection = EnumFacing.UP; //does nothing because down bruh
 
+                HopperNuker.selfPos = blockPos.down(2);
+
                 phase = 1;
 
                 for (EnumFacing tempRedstoneFacing : EnumFacing.values()) {
@@ -576,6 +579,8 @@ public class Auto32k extends Module {
                 basePos = blockPos;
                 dispenserDirection = direction.getOpposite();
 
+                HopperNuker.selfPos = blockPos.offset(direction);
+
                 phase = 1;
 
                 for (EnumFacing redstoneFacing : EnumFacing.values()) {
@@ -600,6 +605,8 @@ public class Auto32k extends Module {
         ) {
             basePos = blockPos;
             dispenserDirection = null;
+
+            HopperNuker.selfPos = blockPos;
 
             phase = 9;
             if (debug.getValue()) info("Start placing 32k using hopper");

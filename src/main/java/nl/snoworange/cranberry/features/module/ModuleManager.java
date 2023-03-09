@@ -46,6 +46,7 @@ public class ModuleManager {
         modules.add(new SelfAnvil());
         modules.add(new AutoAnvil());
         modules.add(new EntityAura());
+        modules.add(new HopperNuker());
 
         modules.add(new SecretClose());
 

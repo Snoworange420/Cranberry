@@ -146,7 +146,7 @@ public class Tooltip extends Module {
                                 lastHoveredStack = slot.getStack();
                             }
                         } else if (lastHoveredStack == null) {
-
+                            //empty block
                         } else if (!enteredShulker && lastHoveredStack != slot.getStack()) {
                             lastHoveredStack = null;
                         }
