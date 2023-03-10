@@ -1,16 +1,16 @@
 package nl.snoworange.cranberry.features.module.modules.stronkswordmeta;
 
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.IAttribute;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketUseEntity;
+import net.minecraft.network.play.server.SPacketEntityStatus;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import nl.snoworange.cranberry.Main;
 import nl.snoworange.cranberry.event.events.BozoJustDiedEvent;
-import nl.snoworange.cranberry.event.events.TotemPopEvent;
+import nl.snoworange.cranberry.event.events.PacketEvent;
 import nl.snoworange.cranberry.features.module.Category;
 import nl.snoworange.cranberry.features.module.Module;
 import nl.snoworange.cranberry.features.setting.Setting;
@@ -77,26 +77,38 @@ public class Aura32k extends Module {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public void onTotemPop(TotemPopEvent event) {
-        if (this.isEnabled()) {
+    public void onPacket(PacketEvent.Receive event) {
+        if (this.isEnabled() && !n()) {
 
-            int stronkswordslot = InventoryUtils.findHotbar32k();
+            if (event.getPacket() instanceof SPacketEntityStatus) {
 
-            if (currentTarget == null || stronkswordslot == -1) return;
+                SPacketEntityStatus packet = (SPacketEntityStatus) event.getPacket();
 
-            new Thread(() -> {
-                mc.player.connection.sendPacket(new CPacketHeldItemChange(stronkswordslot));
-                mc.player.connection.sendPacket(new CPacketUseEntity(currentTarget));
-                mc.player.connection.sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem));
-                if (swing.getValue()) mc.player.swingArm(EnumHand.MAIN_HAND);
-            }).start();
+                if (packet.getOpCode() == 35) {
+
+                    Entity entity = packet.getEntity(mc.world);
+
+                    if (entity instanceof EntityPlayer && !entity.getName().equalsIgnoreCase(mc.player.getName())) {
+
+                        int stronkswordslot = InventoryUtils.findHotbar32k();
+
+                        if (currentTarget == null || stronkswordslot == -1) return;
+
+                        new Thread(() -> {
+                            mc.player.connection.sendPacket(new CPacketHeldItemChange(stronkswordslot));
+                            mc.player.connection.sendPacket(new CPacketUseEntity(currentTarget));
+                            mc.player.connection.sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem));
+                            if (swing.getValue()) mc.player.swingArm(EnumHand.MAIN_HAND);
+                        }).start();
+                    }
+                }
+            }
         }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onKrypticAndKeiranSkillIssue(BozoJustDiedEvent event) {
         event.tooEasy(true);
-
         Bad.getSkill().getGood().info(event.getPlayer().getName() + " is bad ong imagine being that bad");
     }
 }

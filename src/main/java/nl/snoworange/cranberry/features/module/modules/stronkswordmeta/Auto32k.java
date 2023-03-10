@@ -41,6 +41,8 @@ public class Auto32k extends Module {
     public static int lastHopperGuiID = 0;
     public boolean firstShulker = false;
 
+    private static Auto32k instance;
+
     Timer timer = new Timer();
 
     public final Setting<Meta> meta = register(new Setting<>("Meta", Meta.DISPENSER));
@@ -61,6 +63,7 @@ public class Auto32k extends Module {
     public final Setting<Double> maxHopperRange = register(new Setting<>("MaxHopperRange", 5.0, 1.0, 7.0));
     public final Setting<Boolean> selectSwordSlot = register(new Setting<>("Select32kSlot", true));
     public final Setting<Boolean> checkFor32kShulks = register(new Setting<>("Force32kShulker", true));
+    public final Setting<Boolean> updateToOriginalSlot = register(new Setting<>("UpdateToOrigin", false));
     public final Setting<Boolean> debug = register(new Setting<>("Debug", false));
 
     public enum SearchMode {
@@ -71,6 +74,14 @@ public class Auto32k extends Module {
     public enum Meta {
         DISPENSER,
         HOPPER;
+    }
+
+    public static Auto32k getInstance() {
+        return instance != null ? instance : new Auto32k();
+    }
+
+    public int getPhase() {
+        return phase;
     }
 
     public Auto32k() {
@@ -116,8 +127,7 @@ public class Auto32k extends Module {
 
         if (!n()) {
 
-            if (originalSlot != -1 && !selectSwordSlot.getValue()) update(originalSlot, false);
-            update(mc.player.inventory.currentItem, false);
+            if (originalSlot != -1 && !selectSwordSlot.getValue() && updateToOriginalSlot.getValue()) update(originalSlot, false);
 
             mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
         }

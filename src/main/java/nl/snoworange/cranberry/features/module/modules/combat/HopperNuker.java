@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import nl.snoworange.cranberry.event.events.PacketEvent;
 import nl.snoworange.cranberry.features.module.Category;
 import nl.snoworange.cranberry.features.module.Module;
+import nl.snoworange.cranberry.features.module.modules.stronkswordmeta.Auto32k;
 import nl.snoworange.cranberry.features.setting.Setting;
 import nl.snoworange.cranberry.util.minecraft.BlockUtils;
 import nl.snoworange.cranberry.util.minecraft.InventoryUtils;
@@ -79,7 +80,8 @@ public class HopperNuker extends Module {
 
             int oldSlot = mc.player.inventory.currentItem;
 
-            if (onlyOnGround.getValue() && !mc.player.onGround) return;
+            if ((onlyOnGround.getValue() && !mc.player.onGround)
+            || (Auto32k.getInstance().isEnabled() && Auto32k.getInstance().getPhase() != 8)) return;
 
             mc.player.inventory.currentItem = pickaxeIndex;
             mc.playerController.updateController();
