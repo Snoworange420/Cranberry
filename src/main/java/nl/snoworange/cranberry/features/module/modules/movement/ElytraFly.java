@@ -38,8 +38,8 @@ public class ElytraFly extends Module {
     }
 
     public final Setting<Boolean> autoTakeoff = register(new Setting<>("AutoTakeoff", true));
-    public final Setting<Enum> takeoffMode = register(new Setting<>("TakeoffMode", TakeoffMode.KEYBINDDETECTION));
-    public final Setting<Integer> takeoffDelayTicks = register(new Setting<>("TakeoffDelayTicks", 33, 0, 100));
+    public final Setting<Enum> takeoffMode = register(new Setting<>("TakeoffMode", TakeoffMode.KEYBINDDETECTION, v -> autoTakeoff.getValue()));
+    public final Setting<Integer> takeoffDelayTicks = register(new Setting<>("TakeoffDelayTicks", 33, 0, 100, v -> autoTakeoff.getValue()));
     public final Setting<Double> horizontalSpeed = register(new Setting<>("HorizontalSpeed", 1.0, 0.0, 10.0));
     public final Setting<Double> verticalSpeed = register(new Setting<>("VerticalSpeed", 1.0, 0.0, 10.0));
     public final Setting<Boolean> lockY = register(new Setting<>("LockY", false));

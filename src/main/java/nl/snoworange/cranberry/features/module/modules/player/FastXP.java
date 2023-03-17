@@ -37,7 +37,7 @@ public class FastXP extends Module {
     public void onFastTick() {
         if (mc.player.getHeldItemMainhand().getItem() instanceof ItemExpBottle
         || mc.player.getHeldItemOffhand().getItem() instanceof ItemExpBottle) {
-            if(((IMinecraft) mc).getRightClickDelayTimer() != 0) {
+            if (((IMinecraft) mc).getRightClickDelayTimer() != 0) {
                 ((IMinecraft) mc).setRightClickDelayTimer(0);
             }
         }

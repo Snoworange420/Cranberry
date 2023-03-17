@@ -13,6 +13,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import nl.snoworange.cranberry.Main;
+import nl.snoworange.cranberry.event.events.BozoJustDiedEvent;
 import nl.snoworange.cranberry.features.gui.clickgui.CranberryClickGUI;
 import nl.snoworange.cranberry.features.module.modules.combat.*;
 import nl.snoworange.cranberry.features.module.modules.exploit.SecretClose;
@@ -115,6 +116,12 @@ public class ModuleManager {
                 }
             }
         });
+
+        if (event.getEntityLiving() instanceof EntityPlayer) {
+            if (event.getEntityLiving().deathTime == 1) {
+                MinecraftForge.EVENT_BUS.post(new BozoJustDiedEvent((EntityPlayer) event.getEntityLiving()));
+            }
+        }
     }
 
     @SubscribeEvent

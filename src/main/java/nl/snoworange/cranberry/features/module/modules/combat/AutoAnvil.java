@@ -37,8 +37,8 @@ public class AutoAnvil extends Module {
     public final Setting<Boolean> swing = register(new Setting<>("SwingArm", true));
     public final Setting<Boolean> autoDisable = register(new Setting<>("AutoDisable", true));
     public final Setting<Boolean> placeSecond = register(new Setting<>("Place2ndAnvil", true));
+    public final Setting<Integer> secondAnvilDelay = register(new Setting<>("SecondAnvilDelay", 20, 0, 75, v -> placeSecond.getValue()));
     public final Setting<Integer> maxAnvilsOnEnemy = register(new Setting<>("MaxAnvilsOnEnemy", 3, 3, 6));
-    public final Setting<Integer> secondAnvilDelay = register(new Setting<>("SecondAnvilDelay", 20, 0, 75));
     public final Setting<Double> maxRange = register(new Setting<>("MaxTargetRange", 5.5, 0.1, 7.0));
     public final Setting<Double> maxAnvilRange = register(new Setting<>("MaxAnvilRange", 5.0, 1.0, 7.0));
 

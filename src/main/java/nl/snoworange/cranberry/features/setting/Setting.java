@@ -1,7 +1,10 @@
 package nl.snoworange.cranberry.features.setting;
 
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.terraingen.OreGenEvent;
 import nl.snoworange.cranberry.util.EnumConverter;
+
+import java.util.function.Predicate;
 
 public class Setting <T> {
 
@@ -11,7 +14,7 @@ public class Setting <T> {
     public T plannedValue;
     public T min;
     public T max;
-    public boolean isVisible;
+    public Predicate<T> visible;
     public boolean hasRestriction;
 
     public Setting(String name, T defaultValue) {
@@ -19,7 +22,6 @@ public class Setting <T> {
         this.value = defaultValue;
         this.defaultValue = defaultValue;
         this.plannedValue = defaultValue;
-        this.isVisible = true;
         this.hasRestriction = false;
     }
 
@@ -30,27 +32,26 @@ public class Setting <T> {
         this.plannedValue = defaultValue;
         this.min = min;
         this.max = max;
-        this.isVisible = true;
         this.hasRestriction = true;
     }
 
-    public Setting(String name, T defaultValue, T min, T max, boolean isVisible) {
+    public Setting(String name, T defaultValue, T min, T max, Predicate<T> visible) {
         this.name = name;
         this.value = defaultValue;
         this.defaultValue = defaultValue;
         this.plannedValue = defaultValue;
         this.min = min;
         this.max = max;
-        this.isVisible = isVisible;
+        this.visible = visible;
         this.hasRestriction = true;
     }
 
-    public Setting(String name, T defaultValue, boolean isVisible) {
+    public Setting(String name, T defaultValue, Predicate<T> visible) {
         this.name = name;
         this.value = defaultValue;
         this.defaultValue = defaultValue;
         this.plannedValue = defaultValue;
-        this.isVisible = false;
+        this.visible = visible;
         this.hasRestriction = false;
     }
 
@@ -160,8 +161,15 @@ public class Setting <T> {
         return this.hasRestriction;
     }
 
+    public void setVisible(Predicate<T> visible) {
+        this.visible = visible;
+    }
+
     public boolean isVisible() {
-        return this.isVisible;
+        if (this.visible == null) {
+            return true;
+        }
+        return this.visible.test(this.getValue());
     }
 
     public T getMin() {

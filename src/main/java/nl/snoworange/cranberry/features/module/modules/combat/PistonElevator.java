@@ -46,8 +46,8 @@ public class PistonElevator extends Module {
     public final Setting<Boolean> swingArm = register(new Setting<>("SwingArm", true));
     public final Setting<Boolean> silent = register(new Setting<>("Silent", true));
     public final Setting<Boolean> fillHole = register(new Setting<>("FillHole", true));
+    public final Setting<Integer> fillDelayTicks = register(new Setting<>("FillDelayTicks", 3, 0, 20, v -> fillHole.getValue()));
     public final Setting<Integer> redstoneDelayTicks = register(new Setting<>("RedstoneDelayTicks", 3, 0, 20));
-    public final Setting<Integer> fillDelayTicks = register(new Setting<>("FillDelayTicks", 3, 0, 20));
     public final Setting<Boolean> autoDisable = register(new Setting<>("AutoDisable", true));
     public final Setting<Double> maxRange = register(new Setting<>("MaxTargetRange", 5.5, 0.1, 7.0));
     public final Setting<Double> maxPlaceRange = register(new Setting<>("MaxPlaceRange", 6.0, 0.1, 7.0));

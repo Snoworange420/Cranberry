@@ -38,7 +38,6 @@ public class Auto32k extends Module {
     public int lastAirIndex = -1;
     public int tickTimer = 0;
     public int hopperTimer = 0;
-    public static int lastHopperGuiID = 0;
     public boolean firstShulker = false;
 
     private static Auto32k instance;
@@ -46,17 +45,18 @@ public class Auto32k extends Module {
     Timer timer = new Timer();
 
     public final Setting<Meta> meta = register(new Setting<>("Meta", Meta.DISPENSER));
-    public final Setting<Boolean> skipShulkerCheck = register(new Setting<>("SkipShulkerCheck", true));
+    public final Setting<Boolean> skipShulkerCheck = register(new Setting<>("SkipShulkerCheck", true, v -> meta.getValue().equals(Meta.DISPENSER)));
     public final Setting<Boolean> silent = register(new Setting<>("Silent", true));
     public final Setting<Boolean> rotate = register(new Setting<>("Rotate", true));
     public final Setting<Boolean> swingArm = register(new Setting<>("SwingArm", true));
     public final Setting<Boolean> autoClose = register(new Setting<>("AutoClose", true));
+    public final Setting<Boolean> secretClose = register(new Setting<>("SecretClose", true, v -> autoClose.getValue()));
     public final Setting<SearchMode> searchMode = register(new Setting<>("SearchMode", SearchMode.FROMUP));
     public final Setting<Boolean> timeout = register(new Setting<>("Timeout", true));
-    public final Setting<Long> timeoutMs = register(new Setting<>("TimeoutMillis", 1250L, 49L, 3200L));
+    public final Setting<Long> timeoutMs = register(new Setting<>("TimeoutMillis", 1250L, 49L, 3200L, v -> timeout.getValue()));
     public final Setting<Boolean> blockShulker = register(new Setting<>("BlockShulker", true));
     public final Setting<Boolean> allowObsidian = register(new Setting<>("AllowObsidian", true));
-    public final Setting<Integer> hopperDelayTicks = register(new Setting<>("HopperDelayTicks", 5, 0, 20));
+    public final Setting<Integer> hopperDelayTicks = register(new Setting<>("HopperDelayTicks", 5, 0, 20, v -> meta.getValue().equals(Meta.HOPPER)));
     public final Setting<Integer> horizontalRange = register(new Setting<>("HorizontalRange", 6, 1, 7));
     public final Setting<Integer> plusVerticalRange = register(new Setting<>("+VerticalRange", 6, -7, 7));
     public final Setting<Integer> minusVerticalRange = register(new Setting<>("-VerticalRange", 6, -7, 7));
@@ -378,8 +378,6 @@ public class Auto32k extends Module {
                     && !mc.player.openContainer.inventorySlots.isEmpty()
             ) {
 
-                lastHopperGuiID = mc.player.openContainer.windowId;
-
                 for (int i = 0; i < 5; i++) {
                     if (InventoryUtils.is32k(mc.player.openContainer.inventorySlots.get(0).inventory.getStackInSlot(i))) {
                         overenchantedSwordIndex = i;
@@ -402,7 +400,13 @@ public class Auto32k extends Module {
 
                 lastAirIndex = airIndex;
 
-                if (autoClose.getValue() && mc.currentScreen instanceof GuiHopper) mc.player.closeScreen();
+                if (autoClose.getValue() && mc.currentScreen instanceof GuiHopper) {
+                    if (secretClose.getValue()) {
+                        mc.player.closeScreenAndDropStack();
+                    } else {
+                        mc.player.closeScreen();
+                    }
+                }
 
                 if (selectSwordSlot.getValue() && (!blockShulker.getValue() || placeVertically)) update((airIndex != -1 ? airIndex : (revertedSwordIndex != -1 ? revertedSwordIndex : mc.player.inventory.currentItem)), false);
 
@@ -447,7 +451,13 @@ public class Auto32k extends Module {
 
         if (phase == 7) {
 
-            if (autoClose.getValue() && mc.currentScreen instanceof GuiHopper) mc.player.closeScreen();
+            if (autoClose.getValue() && mc.currentScreen instanceof GuiHopper) {
+                if (secretClose.getValue()) {
+                    mc.player.closeScreenAndDropStack();
+                } else {
+                    mc.player.closeScreen();
+                }
+            }
 
             if (selectSwordSlot.getValue()) update((lastAirIndex != -1 ? lastAirIndex : (revertedSwordIndex != -1 ? revertedSwordIndex : mc.player.inventory.currentItem)), false);
 
@@ -463,7 +473,7 @@ public class Auto32k extends Module {
         }
 
         //phase for hopper32k
-        if (phase == 9) {
+        if (phase == 420) {
 
             hopperTimer++;
 
@@ -484,10 +494,10 @@ public class Auto32k extends Module {
                 }
             }
 
-            if (hopperTimer >= hopperDelayTicks.getValue()) phase = 10;
+            if (hopperTimer >= hopperDelayTicks.getValue()) phase = 421;
         }
 
-        if (phase == 10) {
+        if (phase == 421) {
 
             if (firstShulker) {
 
@@ -618,7 +628,8 @@ public class Auto32k extends Module {
 
             HopperNuker.selfPos = blockPos;
 
-            phase = 9;
+            phase = 420;
+
             if (debug.getValue()) info("Start placing 32k using hopper");
         }
     }
