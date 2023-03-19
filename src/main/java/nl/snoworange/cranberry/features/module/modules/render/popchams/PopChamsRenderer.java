@@ -9,6 +9,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import nl.snoworange.cranberry.util.ColorUtils;
 import nl.snoworange.cranberry.util.minecraft.RenderUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -76,8 +77,8 @@ public class PopChamsRenderer {
                     finishedOutline = true;
                 }
 
-                Color finalFillColor = newAlpha(fillColor, fillAlpha);
-                Color finalOutlineColor = newAlpha(outlineColor, outlineAlpha);
+                Color finalFillColor = ColorUtils.newAlpha(fillColor, fillAlpha);
+                Color finalOutlineColor = ColorUtils.newAlpha(outlineColor, outlineAlpha);
 
                 if (PopChams.getInstance().moveMode.getValue().equals(PopChams.MoveMode.UP)) {
                     player.posY += 0.001 * PopChams.getInstance().moveSpeed.getValue();
@@ -147,9 +148,5 @@ public class PopChamsRenderer {
 
     public static void prepareRotations(EntityLivingBase entityLivingBase) {
         GlStateManager.rotate((180.0f - entityLivingBase.rotationYaw), 0.0f, 1.0f, 0.0f);
-    }
-
-    public static Color newAlpha(Color color, int alpha) {
-        return new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
     }
 }

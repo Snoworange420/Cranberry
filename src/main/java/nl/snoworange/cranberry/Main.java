@@ -20,7 +20,7 @@ public class Main {
     //Refrences
     public static final String MOD_ID = "cranberry";
     public static final String NAME = "Cranberry";
-    public static final String VERSION = "v0.8.0";
+    public static final String VERSION = "v0.8.2";
     public static final String ACCEPTED_MINECRAFT_VERSIONS = "[1.12.2]";
     public static final Logger LOGGER = LogManager.getLogger("Cranberry");
 

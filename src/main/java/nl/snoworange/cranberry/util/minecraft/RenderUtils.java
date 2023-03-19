@@ -19,7 +19,7 @@ public class RenderUtils {
     public static Tessellator tessellator = Tessellator.getInstance();
     public static BufferBuilder bufferbuilder = tessellator.getBuffer();
 
-    public static void drawCircle(BlockPos blockPos, double radius, double height, Color color) {
+    public static void drawCircle(BlockPos blockPos, double radius, double height, Color color, float lineWidth) {
 
         if (blockPos == null) return;
 
@@ -41,7 +41,7 @@ public class RenderUtils {
                 blockPos.getZ() + 1 - mc.getRenderManager().viewerPosZ
         );
 
-        renderCircle(box, radius, height, color);
+        renderCircle(box, radius, height, color, lineWidth);
 
         GL11.glDisable(2848);
         GlStateManager.depthMask(true);
@@ -52,7 +52,7 @@ public class RenderUtils {
     }
 
     //a4bva98738va38098j5vja35v35ai
-    public static void renderCircle(AxisAlignedBB axisAlignedBB, double n, double n2, Color color) {
+    public static void renderCircle(AxisAlignedBB axisAlignedBB, double n, double n2, Color color, float lineWidth) {
 
         final float red = color.getRed() / 255f;
         final float green = color.getGreen() / 255f;
@@ -61,6 +61,7 @@ public class RenderUtils {
         GlStateManager.disableCull();
         GlStateManager.disableAlpha();
         GlStateManager.shadeModel(7425);
+        GL11.glLineWidth(lineWidth);
 
         bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
         bufferbuilder.pos(axisAlignedBB.maxX - Double.longBitsToDouble(Double.doubleToLongBits(3.3258652357410368) ^ 0x7FEA9B5F3B9349E6L), axisAlignedBB.minY, axisAlignedBB.maxZ - Double.longBitsToDouble(Double.doubleToLongBits(3.0713387425351564) ^ 0x7FE8921A0BF10295L) + n).color(red, green, blue, Float.intBitsToFloat(Float.floatToIntBits(12.126821f) ^ 0x7EC20775)).endVertex();
@@ -209,6 +210,64 @@ public class RenderUtils {
         GlStateManager.enableCull();
         GlStateManager.enableAlpha();
         GlStateManager.shadeModel(7424);
+    }
+
+    public static void drawFilledBox(BlockPos blockPos, double height, Color color, float lineWidth) {
+
+        GlStateManager.pushMatrix();
+        GlStateManager.enableBlend();
+        GlStateManager.disableDepth();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 0, 1);
+        GlStateManager.disableTexture2D();
+        GlStateManager.depthMask(false);
+        GL11.glEnable(2848);
+        GL11.glHint(3154, 4354);
+        GL11.glLineWidth(lineWidth);
+
+        final AxisAlignedBB box = new AxisAlignedBB(blockPos.getX() - mc.getRenderManager().viewerPosX, blockPos.getY() - mc.getRenderManager().viewerPosY, blockPos.getZ() - mc.getRenderManager().viewerPosZ, blockPos.getX() + 1 - mc.getRenderManager().viewerPosX, blockPos.getY() + 1 - mc.getRenderManager().viewerPosY, blockPos.getZ() + 1 - mc.getRenderManager().viewerPosZ);
+        drawFilledBox(bufferbuilder, box.minX, box.minY, box.minZ, box.maxX, box.maxY + height, box.maxZ, color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, color.getAlpha() / 255.0f);
+
+        GL11.glDisable(2848);
+        GlStateManager.depthMask(true);
+        GlStateManager.enableDepth();
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
+    }
+
+    public static void drawFilledBox(final BufferBuilder builder, final double minX, final double minY, final double minZ, final double maxX, final double maxY, final double maxZ, final float red, final float green, final float blue, final float alpha) {
+        bufferbuilder.begin(5, DefaultVertexFormats.POSITION_COLOR);
+        builder.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(minX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, minY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(minX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, minY, maxZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(minX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(minX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, maxY, minZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        builder.pos(maxX, maxY, maxZ).color(red, green, blue, alpha).endVertex();
+        tessellator.draw();
     }
 
     public static void prepareGL() {

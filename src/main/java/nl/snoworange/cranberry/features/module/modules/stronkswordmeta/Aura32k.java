@@ -9,12 +9,10 @@ import net.minecraft.util.EnumHand;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import nl.snoworange.cranberry.Main;
-import nl.snoworange.cranberry.event.events.BozoJustDiedEvent;
 import nl.snoworange.cranberry.event.events.PacketEvent;
 import nl.snoworange.cranberry.features.module.Category;
 import nl.snoworange.cranberry.features.module.Module;
 import nl.snoworange.cranberry.features.setting.Setting;
-import nl.snoworange.cranberry.misc.java.skillissue.Bad;
 import nl.snoworange.cranberry.util.minecraft.InventoryUtils;
 
 public class Aura32k extends Module {
@@ -106,9 +104,12 @@ public class Aura32k extends Module {
         }
     }
 
+    /*
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onKrypticAndKeiranSkillIssue(BozoJustDiedEvent event) {
         event.tooEasy(true);
         Bad.getSkill().getGood().info(event.getPlayer().getName() + " is bad ong imagine being that bad");
     }
+
+     */
 }

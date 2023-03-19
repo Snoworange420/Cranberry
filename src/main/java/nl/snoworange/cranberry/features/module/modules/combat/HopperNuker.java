@@ -68,16 +68,14 @@ public class HopperNuker extends Module {
 
         for (BlockPos blockPos : BlockPos.getAllInBox(new BlockPos(mc.player.posX - range.getValue(), mc.player.posY - 3, mc.player.posZ - range.getValue()), new BlockPos(mc.player.posX + range.getValue(), mc.player.posY + 3, mc.player.posZ + range.getValue()))) {
 
-            if (!(blockPos.equals(selfPos) && noSelfBreaking.getValue())) {
-
-                if (mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= range.getValue()
-                        && (only32kHoppers.getValue() ? (mc.world.getBlockState(blockPos).getBlock() instanceof BlockHopper
-                        && mc.world.getBlockState(blockPos.up()).getBlock() instanceof BlockShulkerBox) : (mc.world.getBlockState(blockPos).getBlock() instanceof BlockHopper))) {
-                    hopperPos = blockPos;
-                    break;
-                } else {
-                    hopperPos = null;
-                }
+            if (mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= range.getValue()
+                    && (only32kHoppers.getValue() ? (mc.world.getBlockState(blockPos).getBlock() instanceof BlockHopper
+            && mc.world.getBlockState(blockPos.up()).getBlock() instanceof BlockShulkerBox) : (mc.world.getBlockState(blockPos).getBlock() instanceof BlockHopper))
+                    && (!blockPos.equals(selfPos) && noSelfBreaking.getValue())) {
+                hopperPos = blockPos;
+                break;
+            } else {
+                hopperPos = null;
             }
         }
 
@@ -86,7 +84,7 @@ public class HopperNuker extends Module {
             int oldSlot = mc.player.inventory.currentItem;
 
             if ((onlyOnGround.getValue() && !mc.player.onGround)
-            || (Auto32k.getInstance().isEnabled() && Auto32k.getInstance().getPhase() != 8)) return;
+            || (Auto32k.getInstance().isEnabled() && Auto32k.getInstance().getPhase() != 9)) return;
 
             mc.player.inventory.currentItem = pickaxeIndex;
             mc.playerController.updateController();
@@ -121,12 +119,9 @@ public class HopperNuker extends Module {
 
                 CPacketPlayerTryUseItemOnBlock packet = (CPacketPlayerTryUseItemOnBlock) event.getPacket();
                 BlockPos packetPos = packet.getPos();
-                BlockPos resultPos = packet.getPos().offset(packet.getDirection()); //doesnt work bruh
 
                 if (mc.world.getBlockState(packetPos).getBlock() instanceof BlockHopper) {
                     selfPos = packetPos;
-                } else if (mc.objectMouseOver.getBlockPos().equals(resultPos) && mc.player.getHeldItemMainhand().getItem().equals(Item.getItemFromBlock(Blocks.HOPPER))) {
-                    selfPos = resultPos;
                 }
             }
         }

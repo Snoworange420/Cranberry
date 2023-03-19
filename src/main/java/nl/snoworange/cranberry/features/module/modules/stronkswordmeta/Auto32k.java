@@ -2,6 +2,7 @@ package nl.snoworange.cranberry.features.module.modules.stronkswordmeta;
 
 import net.minecraft.block.*;
 import net.minecraft.client.gui.GuiHopper;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiDispenser;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.ClickType;
@@ -45,18 +46,17 @@ public class Auto32k extends Module {
     Timer timer = new Timer();
 
     public final Setting<Meta> meta = register(new Setting<>("Meta", Meta.DISPENSER));
-    public final Setting<Boolean> skipShulkerCheck = register(new Setting<>("SkipShulkerCheck", true, v -> meta.getValue().equals(Meta.DISPENSER)));
-    public final Setting<Boolean> silent = register(new Setting<>("Silent", true));
+    public final Setting<Boolean> silent = register(new Setting<>("Silent", false));
     public final Setting<Boolean> rotate = register(new Setting<>("Rotate", true));
     public final Setting<Boolean> swingArm = register(new Setting<>("SwingArm", true));
     public final Setting<Boolean> autoClose = register(new Setting<>("AutoClose", true));
-    public final Setting<Boolean> secretClose = register(new Setting<>("SecretClose", true, v -> autoClose.getValue()));
+    public final Setting<CloseMode> closeMode = register(new Setting<>("CloseMode", CloseMode.REMOVEGUI, v -> autoClose.getValue()));
+    public final Setting<Integer> closeDelay = register(new Setting<>("CloseDelay", 2, 0, 20, v -> autoClose.getValue()));
     public final Setting<SearchMode> searchMode = register(new Setting<>("SearchMode", SearchMode.FROMUP));
     public final Setting<Boolean> timeout = register(new Setting<>("Timeout", true));
     public final Setting<Long> timeoutMs = register(new Setting<>("TimeoutMillis", 1250L, 49L, 3200L, v -> timeout.getValue()));
     public final Setting<Boolean> blockShulker = register(new Setting<>("BlockShulker", true));
     public final Setting<Boolean> allowObsidian = register(new Setting<>("AllowObsidian", true));
-    public final Setting<Integer> hopperDelayTicks = register(new Setting<>("HopperDelayTicks", 5, 0, 20, v -> meta.getValue().equals(Meta.HOPPER)));
     public final Setting<Integer> horizontalRange = register(new Setting<>("HorizontalRange", 6, 1, 7));
     public final Setting<Integer> plusVerticalRange = register(new Setting<>("+VerticalRange", 6, -7, 7));
     public final Setting<Integer> minusVerticalRange = register(new Setting<>("-VerticalRange", 6, -7, 7));
@@ -74,6 +74,12 @@ public class Auto32k extends Module {
     public enum Meta {
         DISPENSER,
         HOPPER;
+    }
+
+    public enum CloseMode {
+        REMOVEGUI,
+        LEGIT,
+        DROPSTACK;
     }
 
     public static Auto32k getInstance() {
@@ -107,6 +113,8 @@ public class Auto32k extends Module {
         dispenserDirection = null;
 
         firstShulker = false;
+
+        placeVertically = true;
 
         useDispenser = meta.getValue() == Meta.DISPENSER;
 
@@ -196,7 +204,7 @@ public class Auto32k extends Module {
             }
         }
 
-        if (phase == 0) {
+        if (phase == 0) { //ik this code sucks
             if (basePos == null) {
                 placeVertically = false;
                 searchPlacement();
@@ -204,7 +212,11 @@ public class Auto32k extends Module {
                 if (basePos == null) {
                     placeVertically = true;
                     searchPlacement();
+                } else {
+                    phase = useDispenser ? 1 : 420;
                 }
+            } else {
+                phase = useDispenser ? 1 : 420;
             }
         }
 
@@ -286,40 +298,23 @@ public class Auto32k extends Module {
 
                 if (debug.getValue()) info("Swapped shulker @ slot " + shulkerIndex);
 
-                if (skipShulkerCheck.getValue()) {
+                if (mc.currentScreen instanceof GuiDispenser) mc.player.closeScreen();
+
+                if (redstonePos != null) {
+
+                    update(redstoneIndex, silent.getValue());
+                    placeBlock(redstonePos);
 
                     phase = 3;
-
-                    if (mc.currentScreen instanceof GuiDispenser) mc.player.closeScreen();
-
-                } else if (mc.player.openContainer.inventorySlots.get(0).getStack().getItem() instanceof ItemShulkerBox) { //check if shulker is "actually" is swapped
-
-                    phase = 3;
-
-                    if (mc.currentScreen instanceof GuiDispenser) mc.player.closeScreen();
+                } else {
+                    error("No valid redstone placements!");
+                    disable();
+                    return;
                 }
             }
         }
 
         if (phase == 3) {
-
-            //place redstone
-            if (redstonePos != null) {
-
-                update(redstoneIndex, silent.getValue());
-                placeBlock(redstonePos);
-
-                phase = 4;
-
-            } else {
-                error("Coudn't find any valid redstone placement! disabling...");
-
-                disable();
-                return;
-            }
-        }
-
-        if (phase == 4) {
 
             if (useDispenser) {
 
@@ -351,25 +346,12 @@ public class Auto32k extends Module {
                             EnumHand.MAIN_HAND
                     );
                 }
-            } else {
-
-                mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
-
-                mc.playerController.processRightClickBlock(mc.player,
-                        mc.world,
-                        basePos,
-                        EnumFacing.UP,
-                        new Vec3d(basePos.getX(),
-                                basePos.getY(),
-                                basePos.getZ()),
-                        EnumHand.MAIN_HAND
-                );
             }
 
-            phase = 5;
+            phase = 4;
         }
 
-        if (phase == 5) {
+        if (phase == 4) {
             //swap 32k
             if (overenchantedSwordIndex == -1
                     && mc.player.openContainer != null
@@ -385,9 +367,7 @@ public class Auto32k extends Module {
                     }
                 }
 
-                if (overenchantedSwordIndex == -1) {
-                    return;
-                }
+                if (overenchantedSwordIndex == -1) return;
 
                 int airIndex = InventoryUtils.findHotbarItem(Item.getItemFromBlock(Blocks.AIR));
 
@@ -400,22 +380,31 @@ public class Auto32k extends Module {
 
                 lastAirIndex = airIndex;
 
-                if (autoClose.getValue() && mc.currentScreen instanceof GuiHopper) {
-                    if (secretClose.getValue()) {
-                        mc.player.closeScreenAndDropStack();
-                    } else {
-                        mc.player.closeScreen();
-                    }
-                }
-
                 if (selectSwordSlot.getValue() && (!blockShulker.getValue() || placeVertically)) update((airIndex != -1 ? airIndex : (revertedSwordIndex != -1 ? revertedSwordIndex : mc.player.inventory.currentItem)), false);
 
                 if (debug.getValue()) info("32k found in slot " + overenchantedSwordIndex);
 
-                if (debug.getValue() && !blockShulker.getValue()) info("Process ended in " + timer.getPassedTimeMs() + " ms / " + tickTimer + "tx");
+                phase = 5;
+            }
+        }
 
-                if (!blockShulker.getValue() || placeVertically) disable();
+        if (phase == 5) {
 
+            hopperTimer++;
+
+            if (!blockShulker.getValue() || placeVertically) {
+
+                if (hopperTimer >= closeDelay.getValue()) {
+                    closeHopperGui();
+                    disable();
+
+                    update(mc.player.inventory.currentItem, false);
+
+                    if (debug.getValue() && !blockShulker.getValue()) info("Process ended in " + timer.getPassedTimeMs() + " ms / " + tickTimer + "tx");
+
+                    phase = 9;
+                }
+            } else {
                 phase = 6;
             }
         }
@@ -432,18 +421,21 @@ public class Auto32k extends Module {
                     return;
                 }
 
-                if ((useDispenser
-                        && BlockUtils.isEmptyBlock(basePos.offset(dispenserDirection.getOpposite()).up(2), true)
-                        && BlockUtils.checkIfBlockIsPlaceable(basePos.offset(dispenserDirection.getOpposite()).up(2)))
-                        || (!useDispenser
-                        && BlockUtils.isEmptyBlock(basePos.up().offset(mc.world.getBlockState(basePos.up()).getValue(BlockDirectional.FACING)), true)
-                        && BlockUtils.checkIfBlockIsPlaceable(basePos.up().offset(mc.world.getBlockState(basePos.up()).getValue(BlockDirectional.FACING))))) {
+                try {
+                    if ((useDispenser
+                            && BlockUtils.isEmptyBlock(basePos.offset(dispenserDirection.getOpposite()).up(2), true)
+                            && BlockUtils.checkIfBlockIsPlaceable(basePos.offset(dispenserDirection.getOpposite()).up(2)))
+                            || (!useDispenser
+                            && BlockUtils.isEmptyBlock(basePos.up().offset(mc.world.getBlockState(basePos.up()).getValue(BlockDirectional.FACING)), true)
+                            && BlockUtils.checkIfBlockIsPlaceable(basePos.up().offset(mc.world.getBlockState(basePos.up()).getValue(BlockDirectional.FACING))))) {
 
-                    update((allowObsidian.getValue() && obsidianIndex != -1) ? obsidianIndex : (dispenserIndex != -1 ? dispenserIndex : redstoneIndex), silent.getValue());
-                    placeBlock(useDispenser ? basePos.offset(dispenserDirection.getOpposite()).up(2) : basePos.up().offset(mc.world.getBlockState(basePos.up()).getValue(BlockDirectional.FACING)));
-                    update(mc.player.inventory.currentItem, false);
+                        update((allowObsidian.getValue() && obsidianIndex != -1) ? obsidianIndex : (dispenserIndex != -1 ? dispenserIndex : redstoneIndex), silent.getValue());
+                        placeBlock(useDispenser ? basePos.offset(dispenserDirection.getOpposite()).up(2) : basePos.up().offset(mc.world.getBlockState(basePos.up()).getValue(BlockDirectional.FACING)));
+                        update(mc.player.inventory.currentItem, false);
+                    }
+                } catch (IllegalArgumentException exception) {
+                    exception.printStackTrace();
                 }
-
             }
 
             phase = 7;
@@ -451,22 +443,31 @@ public class Auto32k extends Module {
 
         if (phase == 7) {
 
-            if (autoClose.getValue() && mc.currentScreen instanceof GuiHopper) {
-                if (secretClose.getValue()) {
-                    mc.player.closeScreenAndDropStack();
-                } else {
-                    mc.player.closeScreen();
-                }
-            }
-
             if (selectSwordSlot.getValue()) update((lastAirIndex != -1 ? lastAirIndex : (revertedSwordIndex != -1 ? revertedSwordIndex : mc.player.inventory.currentItem)), false);
 
-            if (debug.getValue()) info("Process ended in " + timer.getPassedTimeMs() + " ms / " + tickTimer + "tx");
+            hopperTimer = 0;
 
             phase = 8;
         }
 
         if (phase == 8) {
+
+            hopperTimer++;
+
+            if (hopperTimer >= closeDelay.getValue()) {
+
+                closeHopperGui();
+                disable();
+
+                update(mc.player.inventory.currentItem, false);
+
+                if (debug.getValue()) info("Process ended in " + timer.getPassedTimeMs() + " ms / " + tickTimer + "tx");
+
+                phase = 9;
+            }
+        }
+
+        if (phase == 9) {
             if (HopperRadius.getInstance().sync32kHopper.getValue() && basePos != null) {
                 HopperRadius.getInstance().hopperPos = useDispenser ? (placeVertically ? basePos.down(2) : basePos.offset(dispenserDirection.getOpposite())) : basePos;
             }
@@ -475,44 +476,24 @@ public class Auto32k extends Module {
         //phase for hopper32k
         if (phase == 420) {
 
-            hopperTimer++;
+            update(hopperIndex, silent.getValue());
+            placeBlock(basePos);
 
-            if (BlockUtils.checkIfBlockIsPlaceable(basePos)) {
-                if (hopperIndex != -1) {
-                    update(hopperIndex, silent.getValue());
-                    placeBlock(basePos);
-                    update(mc.player.inventory.currentItem, false);
-                }
-            } else {
+            update(shulkerIndex, silent.getValue());
+            placeBlock(basePos.up());
+            update(mc.player.inventory.currentItem, false);
 
-                firstShulker = true;
+            mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
 
-                if (shulkerIndex != -1) {
-                    update(shulkerIndex, silent.getValue());
-                    placeBlock(basePos.up());
-                    update(mc.player.inventory.currentItem, false);
-                }
-            }
-
-            if (hopperTimer >= hopperDelayTicks.getValue()) phase = 421;
-        }
-
-        if (phase == 421) {
-
-            if (firstShulker) {
-
-                if (hopperIndex != -1) {
-                    update(hopperIndex, silent.getValue());
-                    placeBlock(basePos);
-                    update(mc.player.inventory.currentItem, false);
-                }
-            } else {
-                if (shulkerIndex != -1) {
-                    update(shulkerIndex, silent.getValue());
-                    placeBlock(basePos.up());
-                    update(mc.player.inventory.currentItem, false);
-                }
-            }
+            mc.playerController.processRightClickBlock(mc.player,
+                    mc.world,
+                    basePos,
+                    EnumFacing.UP,
+                    new Vec3d(basePos.getX(),
+                            basePos.getY(),
+                            basePos.getZ()),
+                    EnumHand.MAIN_HAND
+            );
 
             phase = 4;
         }
@@ -558,27 +539,23 @@ public class Auto32k extends Module {
 
     public void startDispenser32k(BlockPos blockPos, EnumFacing direction) {
         if (placeVertically) {
-            if (mc.player.getDistance(blockPos.down(2).getX(), blockPos.down(2).getY(), blockPos.down(2).getX()) <= maxHopperRange.getValue()
+
+            if (mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= maxHopperRange.getValue()
                     && BlockUtils.isEmptyBlock(blockPos, true)
                     && BlockUtils.isEmptyBlock(blockPos.down(), true)
                     && BlockUtils.isEmptyBlock(blockPos.down(2), true)
                     && EnumFacing.getDirectionFromEntityLiving(blockPos, mc.player).equals(EnumFacing.DOWN)
                     && BlockUtils.checkIfBlockIsPlaceable(blockPos)
-                    && (BlockUtils.checkIfBlockIsPlaceable(blockPos.down(2)) || mc.world.getBlockState(blockPos.down(3)).getMaterial().isSolid())
-                    && !(BlockUtils.exsistsBlocksNearby(blockPos.down(2), Blocks.REDSTONE_BLOCK))
+                    && BlockUtils.checkIfBlockIsPlaceable(blockPos.down(2))
+                    && !BlockUtils.exsistsBlocksNearby(blockPos.down(2), Blocks.REDSTONE_BLOCK)
             ) {
                 basePos = blockPos;
-                dispenserDirection = EnumFacing.UP; //does nothing because down bruh
+                dispenserDirection = EnumFacing.UP;
 
                 HopperNuker.selfPos = blockPos.down(2);
 
-                phase = 1;
-
                 for (EnumFacing tempRedstoneFacing : EnumFacing.values()) {
-
-                    if (tempRedstoneFacing.equals(EnumFacing.DOWN)) continue;
-
-                    if (BlockUtils.isEmptyBlock(blockPos.offset(tempRedstoneFacing), true)) {
+                    if (!tempRedstoneFacing.equals(EnumFacing.DOWN) && BlockUtils.isEmptyBlock(blockPos.offset(tempRedstoneFacing), true)) {
                         redstonePos = blockPos.offset(tempRedstoneFacing);
                         break;
                     }
@@ -601,8 +578,6 @@ public class Auto32k extends Module {
 
                 HopperNuker.selfPos = blockPos.offset(direction);
 
-                phase = 1;
-
                 for (EnumFacing redstoneFacing : EnumFacing.values()) {
                     if (!(redstoneFacing.equals(EnumFacing.DOWN)
                             || blockPos.up().offset(redstoneFacing).equals(blockPos.up().offset(direction)))) {
@@ -620,15 +595,13 @@ public class Auto32k extends Module {
         if (mc.player.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= maxHopperRange.getValue()
                 && BlockUtils.isEmptyBlock(blockPos, true)
                 && BlockUtils.isEmptyBlock(blockPos.up(), true)
-                && (BlockUtils.checkIfBlockIsPlaceable(blockPos) || BlockUtils.checkIfBlockIsPlaceable(blockPos.up()))
+                && BlockUtils.checkIfBlockIsPlaceable(blockPos)
                 && !(BlockUtils.exsistsBlocksNearby(blockPos, Blocks.REDSTONE_BLOCK))
         ) {
             basePos = blockPos;
             dispenserDirection = null;
 
             HopperNuker.selfPos = blockPos;
-
-            phase = 420;
 
             if (debug.getValue()) info("Start placing 32k using hopper");
         }
@@ -669,5 +642,16 @@ public class Auto32k extends Module {
         mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
 
         if (swingArm.getValue()) mc.player.swingArm(EnumHand.MAIN_HAND);
+    }
+
+    public void closeHopperGui() {
+        switch (closeMode.getValue()) {
+            case LEGIT:
+                mc.player.closeScreen();
+            case DROPSTACK:
+                mc.player.closeScreenAndDropStack();
+            case REMOVEGUI:
+                mc.displayGuiScreen((GuiScreen) null);
+        }
     }
 }

@@ -126,22 +126,6 @@ public class BlockUtils {
                 mc.player.posZ);
     }
 
-    public static List<BlockPos> getCircle(final BlockPos loc, final int y, final float r, final boolean hollow) {
-        final List<BlockPos> circleblocks = new ArrayList<BlockPos>();
-        final int cx = loc.getX();
-        final int cz = loc.getZ();
-        for (int x = cx - (int)r; x <= cx + r; x++){
-            for (int z = cz - (int)r; z <= cz + r; z++){
-                final double dist = (cx - x) * (cx - x) + (cz - z) * (cz - z);
-                if (dist < r * r && (!hollow || dist >= (r - 1.0f) * (r - 1.0f))){
-                    final BlockPos l = new BlockPos(x, y, z);
-                    circleblocks.add(l);
-                }
-            }
-        }
-        return circleblocks;
-    }
-
 
     public static EnumFacing getPlaceableSide(BlockPos pos) {
 
